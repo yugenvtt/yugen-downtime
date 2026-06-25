@@ -1,0 +1,226 @@
+<div class="downtime-app-container">
+	<header class="downtime-header">
+		<div class="downtime-branding">
+			<h1 class="branding-title">yugen-downtime</h1>
+		</div>
+		<nav class="sheet-tabs tabs" data-group="downtime">
+			{{#each tabs}}
+			<a class="item {{this.cssClass}}" data-action="tab" data-group="{{this.group}}" data-tab="{{this.id}}">
+				<i class="{{this.icon}}"></i> {{this.label}}
+			</a>
+			{{/each}}
+		</nav>
+	</header>
+
+	<section class="sheet-body">
+		{{#if tabs.actions.active}}
+		<div class="tab actions-tab">
+			{{#if player.has_actor}}
+			<div class="player-hero">
+				<div class="hero-left">
+					<span class="hero-subtitle">downtime manager</span>
+					<h2 class="hero-title">{{player.name}}</h2>
+				</div>
+				<div class="hero-points-card">
+					<span class="points-val">{{player.points}}</span>
+					<span class="points-lbl">Points</span>
+				</div>
+			</div>
+
+			{{#if is_active}}
+			<div class="actions-grid">
+				{{#each actions}}
+				<div class="action-card {{#unless this.can_afford}}disabled{{/unless}}">
+					<div class="card-header-row">
+						<h3 class="card-title">{{this.name}}</h3>
+						<span class="card-cost">{{this.cost}} pts</span>
+					</div>
+					<p class="card-desc">{{this.description}}</p>
+					
+					<div class="card-meta">
+						{{#if this.roll_check}}
+						<div class="meta-badge check-badge">
+							<i class="fas fa-dice-d20"></i> {{this.roll_check}} {{#if this.dc}}(DC {{this.dc}}){{/if}}
+						</div>
+						{{/if}}
+						{{#if this.macro_name}}
+						<div class="meta-badge macro-badge">
+							<i class="fas fa-terminal"></i> {{this.macro_name}}
+						</div>
+						{{/if}}
+					</div>
+
+					<button class="action-btn buy-btn" data-action="buy" data-action-id="{{this.id}}" data-actor-id="{{../player.id}}" {{#unless this.can_afford}}disabled{{/unless}}>
+						Invest points
+					</button>
+				</div>
+				{{/each}}
+			</div>
+			{{else}}
+			<div class="empty-banner warning">
+				<i class="fas fa-hourglass-half"></i>
+				<div class="banner-text">
+					<h4>Downtime is currently inactive</h4>
+					<p>Wait for the Gamemaster to activate downtime mode to invest your points.</p>
+				</div>
+			</div>
+			{{/if}}
+
+			<div class="history-section">
+				<div class="section-title-row">
+					<h3 class="section-heading">My Activity</h3>
+				</div>
+				<div class="logs-feed">
+					{{#each player_logs}}
+					<div class="feed-item">
+						<span class="item-time">{{this.formatted_time}}</span>
+						<span class="item-text">
+							Invested in <strong>{{this.action_name}}</strong> ({{this.cost}} pts)
+							{{#if this.roll_check}}
+							- Rolled <strong>{{this.roll_total}}</strong> {{#if this.dc}}vs DC {{this.dc}}{{/if}} ({{#if this.roll_success}}<span class="success-text">Success</span>{{else}}<span class="failure-text">Failure</span>{{/if}})
+							{{/if}}
+						</span>
+					</div>
+					{{else}}
+					<div class="feed-empty">No investments recorded yet.</div>
+					{{/each}}
+				</div>
+			</div>
+
+			{{else}}
+			<div class="empty-banner danger">
+				<i class="fas fa-user-slash"></i>
+				<div class="banner-text">
+					<h4>No Active Character</h4>
+					<p>Please select or assign a controlled character token to participate in downtime.</p>
+				</div>
+			</div>
+			{{/if}}
+		</div>
+		{{/if}}
+
+		{{#if tabs.manage.active}}
+		<div class="tab manage-tab">
+			<div class="gm-top-panel">
+				<div class="mode-toggle-group">
+					<label class="ios-switch">
+						<input type="checkbox" data-action="toggle-mode" {{#if is_active}}checked{{/if}}>
+						<span class="switch-slider"></span>
+					</label>
+					<div class="toggle-info">
+						<span class="toggle-title">Downtime Mode</span>
+						<span class="toggle-desc">Toggle player access to downtime options</span>
+					</div>
+				</div>
+			</div>
+
+			<div class="gm-main-layout">
+				<div class="layout-sidebar">
+					<div class="section-title-row">
+						<h3 class="section-heading">Character Pools</h3>
+					</div>
+					<div class="actors-feed">
+						{{#each actors}}
+						<div class="actor-feed-item">
+							<div class="actor-row-main">
+								<img class="actor-avatar" src="{{this.img}}" alt="{{this.name}}">
+								<span class="actor-name">{{this.name}}</span>
+								<input type="number" class="actor-points-input" value="{{this.points}}" min="0" data-action="update-actor-points" data-actor-id="{{this.id}}" title="Current Downtime Points">
+							</div>
+							<div class="actor-row-rates">
+								<span class="rates-label">Rest gains (SR/LR):</span>
+								<div class="rates-inputs">
+									<input type="number" class="actor-rate-input" value="{{this.rest_short}}" min="0" data-action="update-actor-rate" data-rate-type="short" data-actor-id="{{this.id}}" title="Points gained on Short Rest">
+									<input type="number" class="actor-rate-input" value="{{this.rest_long}}" min="0" data-action="update-actor-rate" data-rate-type="long" data-actor-id="{{this.id}}" title="Points gained on Long Rest">
+								</div>
+							</div>
+						</div>
+						{{else}}
+						<div class="feed-empty">No character actors in the world.</div>
+						{{/each}}
+					</div>
+				</div>
+
+				<div class="layout-content">
+					<div class="section-title-row">
+						<h3 class="section-heading">Downtime Configurations</h3>
+						<button class="action-btn outline-btn compact-btn" data-action="add-action">
+							<i class="fas fa-plus"></i> New Action
+						</button>
+					</div>
+
+					<div class="config-cards-list">
+						{{#each actions}}
+						<div class="config-card" data-action-id="{{this.id}}">
+							<div class="config-header">
+								<input type="text" class="config-name-input" value="{{this.name}}" placeholder="Action Name..." data-action="edit-action-field" data-field="name" data-action-id="{{this.id}}">
+								<button class="config-delete-btn" data-action="delete-action" data-action-id="{{this.id}}">
+									<i class="fas fa-trash-alt"></i>
+								</button>
+							</div>
+							
+							<textarea class="config-desc-textarea" placeholder="Describe the downtime action..." data-action="edit-action-field" data-field="description" data-action-id="{{this.id}}">{{this.description}}</textarea>
+							
+							<div class="config-form-grid">
+								<div class="form-field">
+									<label class="field-label">Cost</label>
+									<input type="number" class="field-input" value="{{this.cost}}" min="0" data-action="edit-action-field" data-field="cost" data-action-id="{{this.id}}">
+								</div>
+								
+								<div class="form-field">
+									<label class="field-label">Macro</label>
+									<select class="field-select" data-action="edit-action-field" data-field="macro" data-action-id="{{this.id}}">
+										<option value="">None</option>
+										{{#each ../macros}}
+										<option value="{{this.id}}" {{#if (eq ../macro_id this.id)}}selected{{/if}}>{{this.name}}</option>
+										{{/each}}
+									</select>
+								</div>
+
+								<div class="form-field">
+									<label class="field-label">Check</label>
+									<select class="field-select" data-action="edit-action-field" data-field="roll_check" data-action-id="{{this.id}}">
+										{{#each ../roll_choices}}
+										<option value="{{this.id}}" {{#if (eq ../roll_check this.id)}}selected{{/if}}>{{this.name}}</option>
+										{{/each}}
+									</select>
+								</div>
+
+								<div class="form-field">
+									<label class="field-label">DC</label>
+									<input type="number" class="field-input" value="{{this.dc}}" min="0" data-action="edit-action-field" data-field="dc" data-action-id="{{this.id}}">
+								</div>
+							</div>
+						</div>
+						{{/each}}
+					</div>
+				</div>
+			</div>
+
+			<div class="history-section gm-logs-panel">
+				<div class="section-title-row">
+					<h3 class="section-heading">Downtime Logs</h3>
+					<button class="action-btn outline-btn danger-hover compact-btn" data-action="clear-logs">
+						<i class="fas fa-trash-alt"></i> Clear
+					</button>
+				</div>
+				<div class="logs-feed">
+					{{#each logs}}
+					<div class="feed-item">
+						<span class="item-time">{{this.formatted_time}}</span>
+						<span class="item-text">
+							<strong>{{this.actor_name}}</strong> invested in <strong>{{this.action_name}}</strong> ({{this.cost}} pts)
+							{{#if this.roll_check}}
+							- Rolled <strong>{{this.roll_total}}</strong> {{#if this.dc}}vs DC {{this.dc}}{{/if}} ({{#if this.roll_success}}<span class="success-text">Success</span>{{else}}<span class="failure-text">Failure</span>{{/if}})
+							{{/if}}
+						</span>
+					</div>
+					{{else}}
+					<div class="feed-empty">No activity has been logged yet.</div>
+					{{/each}}
+				</div>
+			</div>
+		</div>
+		{{/if}}
+	</section>
+</div>

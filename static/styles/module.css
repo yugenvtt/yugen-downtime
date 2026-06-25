@@ -1,0 +1,959 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+
+/** global application overrides **/
+.yugen-downtime.app,
+.yugen-downtime input,
+.yugen-downtime select,
+.yugen-downtime textarea,
+.yugen-downtime button:not(.header-control):not(.close),
+.yugen-downtime select option
+{
+	font-family: 'Outfit', sans-serif !important;
+}
+
+/** premium minimal window theme **/
+.yugen-downtime.app
+{
+	background: #090a0f !important;
+	border: 1px solid rgba(255, 255, 255, 0.05) !important;
+	border-image: none !important;
+	border-radius: 14px !important;
+	box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8) !important;
+	color: #e2e8f0 !important;
+	overflow: hidden !important;
+}
+
+/** window header **/
+.yugen-downtime.app .window-header
+{
+	background: transparent !important;
+	border-bottom: none !important;
+	border-image: none !important;
+	padding: 0 !important;
+	height: 0 !important;
+	min-height: 0 !important;
+	position: static !important;
+}
+
+.yugen-downtime.app .window-header .window-title
+{
+	display: none !important;
+}
+
+/** premium window header close button **/
+.yugen-downtime.app .window-header button.header-control,
+.yugen-downtime.app .window-header [data-action="close"],
+.yugen-downtime.app .window-header button.close,
+.yugen-downtime.app .window-header .close,
+.yugen-downtime.app .window-header .header-control,
+.yugen-downtime.app button.header-control,
+.yugen-downtime.app [data-action="close"],
+.yugen-downtime.app button.close,
+.yugen-downtime.app .close,
+.yugen-downtime.app .header-control
+{
+	color: #64748b !important;
+	background: rgba(255, 255, 255, 0.03) !important;
+	border: 1px solid rgba(255, 255, 255, 0.05) !important;
+	border-radius: 8px !important;
+	width: 28px !important;
+	height: 28px !important;
+	display: flex !important;
+	align-items: center !important;
+	justify-content: center !important;
+	cursor: pointer !important;
+	transition: all 0.2s ease !important;
+	padding: 0 !important;
+	font-size: 0.85rem !important;
+	box-shadow: none !important;
+	position: absolute !important;
+	top: 14px !important;
+	right: 14px !important;
+	z-index: 100 !important;
+}
+
+.yugen-downtime.app .window-header button.header-control:hover,
+.yugen-downtime.app .window-header [data-action="close"]:hover,
+.yugen-downtime.app .window-header button.close:hover,
+.yugen-downtime.app .window-header .close:hover,
+.yugen-downtime.app .window-header .header-control:hover,
+.yugen-downtime.app button.header-control:hover,
+.yugen-downtime.app [data-action="close"]:hover,
+.yugen-downtime.app button.close:hover,
+.yugen-downtime.app .close:hover,
+.yugen-downtime.app .header-control:hover
+{
+	color: #f43f5e !important;
+	background: rgba(244, 63, 94, 0.1) !important;
+	border-color: rgba(244, 63, 94, 0.25) !important;
+}
+
+.yugen-downtime .downtime-app-container
+{
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+}
+
+/** floating capsule navigation bar **/
+.yugen-downtime .downtime-header
+{
+	padding: 16px 50px 12px 20px;
+	background: rgba(5, 6, 9, 0.15);
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.yugen-downtime .downtime-branding .branding-title
+{
+	font-size: 1.15rem;
+	font-weight: 700;
+	color: #38bdf8;
+	margin: 0;
+	letter-spacing: -0.25px;
+	text-transform: lowercase;
+}
+
+.yugen-downtime nav.sheet-tabs
+{
+	display: inline-flex;
+	background: rgba(0, 0, 0, 0.25);
+	padding: 3px;
+	border-radius: 20px;
+	border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.yugen-downtime nav.sheet-tabs a.item
+{
+	color: #94a3b8;
+	padding: 6px 16px;
+	font-size: 0.85rem;
+	font-weight: 600;
+	border-radius: 16px;
+	transition: all 0.2s ease;
+	text-decoration: none;
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.yugen-downtime nav.sheet-tabs a.item:hover
+{
+	color: #f1f5f9;
+}
+
+.yugen-downtime nav.sheet-tabs a.item.active
+{
+	color: #ffffff;
+	background: rgba(255, 255, 255, 0.08);
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.yugen-downtime nav.sheet-tabs a.item.gm-only
+{
+	border-left: none;
+	margin-left: 0;
+}
+
+/** content area **/
+.yugen-downtime .sheet-body
+{
+	padding: 20px;
+	height: calc( 100% - 64px );
+	overflow: hidden;
+}
+
+.yugen-downtime .tab
+{
+	height: 100%;
+}
+
+.yugen-downtime .actions-tab
+{
+	overflow-y: auto;
+	height: 100%;
+	padding-right: 6px;
+}
+
+/** minimalist hero banner **/
+.yugen-downtime .player-hero
+{
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding-bottom: 24px;
+	border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+	margin-bottom: 24px;
+}
+
+.yugen-downtime .hero-subtitle
+{
+	display: block;
+	font-size: 0.7rem;
+	text-transform: uppercase;
+	letter-spacing: 1.5px;
+	color: #64748b;
+	font-weight: 700;
+	margin-bottom: 4px;
+}
+
+.yugen-downtime .hero-title
+{
+	font-size: 1.6rem;
+	font-weight: 700;
+	color: #ffffff;
+	margin: 0;
+	letter-spacing: -0.5px;
+}
+
+.yugen-downtime .hero-points-card
+{
+	background: rgba(255, 255, 255, 0.02);
+	border: 1px solid rgba(255, 255, 255, 0.05);
+	padding: 10px 24px;
+	border-radius: 12px;
+	text-align: right;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+	display: flex;
+	align-items: baseline;
+	gap: 8px;
+}
+
+.yugen-downtime .hero-points-card .points-val
+{
+	font-size: 2rem;
+	font-weight: 700;
+	color: #38bdf8;
+	line-height: 1;
+}
+
+.yugen-downtime .hero-points-card .points-lbl
+{
+	font-size: 0.75rem;
+	color: #64748b;
+	text-transform: uppercase;
+	font-weight: 600;
+	letter-spacing: 0.5px;
+}
+
+/** clean actions grid **/
+.yugen-downtime .actions-grid
+{
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+	gap: 20px;
+}
+
+.yugen-downtime .action-card
+{
+	background: rgba(255, 255, 255, 0.01);
+	border: 1px solid rgba(255, 255, 255, 0.04);
+	border-radius: 12px;
+	padding: 20px;
+	display: flex;
+	flex-direction: column;
+	transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.yugen-downtime .action-card:hover
+{
+	background: rgba(255, 255, 255, 0.02);
+	border-color: rgba(255, 255, 255, 0.08);
+	transform: translateY(-2px);
+	box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+.yugen-downtime .action-card.disabled
+{
+	opacity: 0.45;
+}
+
+.yugen-downtime .card-header-row
+{
+	display: flex;
+	justify-content: space-between;
+	align-items: baseline;
+	margin-bottom: 12px;
+}
+
+.yugen-downtime .card-title
+{
+	font-size: 1.1rem;
+	font-weight: 600;
+	color: #ffffff;
+	margin: 0;
+}
+
+.yugen-downtime .card-cost
+{
+	font-size: 0.8rem;
+	font-weight: 600;
+	color: #38bdf8;
+	background: rgba(56, 189, 248, 0.08);
+	border: 1px solid rgba(56, 189, 248, 0.15);
+	padding: 2px 8px;
+	border-radius: 6px;
+}
+
+.yugen-downtime .card-desc
+{
+	font-size: 0.85rem;
+	color: #94a3b8;
+	line-height: 1.5;
+	margin: 0 0 18px 0;
+	flex-grow: 1;
+}
+
+.yugen-downtime .card-meta
+{
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin-bottom: 18px;
+}
+
+.yugen-downtime .meta-badge
+{
+	font-size: 0.75rem;
+	font-weight: 500;
+	padding: 4px 10px;
+	border-radius: 6px;
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+}
+
+.yugen-downtime .check-badge
+{
+	color: #fbbf24;
+	background: rgba(250, 204, 21, 0.05);
+	border: 1px solid rgba(250, 204, 21, 0.1);
+}
+
+.yugen-downtime .macro-badge
+{
+	color: #a855f7;
+	background: rgba(168, 85, 247, 0.05);
+	border: 1px solid rgba(168, 85, 247, 0.1);
+}
+
+/** clean modern buttons **/
+.yugen-downtime .action-btn
+{
+	background: #ffffff;
+	color: #0f172a;
+	border: 1px solid #ffffff;
+	border-radius: 8px;
+	padding: 8px 16px;
+	font-size: 0.85rem;
+	font-weight: 600;
+	cursor: pointer;
+	transition: all 0.2s ease;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 6px;
+	width: auto !important;
+}
+
+.yugen-downtime .action-btn:hover:not(:disabled)
+{
+	background: #f1f5f9;
+	border-color: #f1f5f9;
+	box-shadow: 0 4px 12px rgba(255, 255, 255, 0.1);
+}
+
+.yugen-downtime .action-btn:disabled
+{
+	background: rgba(255, 255, 255, 0.02);
+	color: #475569;
+	border: 1px solid rgba(255, 255, 255, 0.04);
+	cursor: not-allowed;
+}
+
+.yugen-downtime .buy-btn
+{
+	width: 100% !important;
+}
+
+.yugen-downtime .outline-btn
+{
+	background: transparent;
+	color: #e2e8f0;
+	border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.yugen-downtime .outline-btn:hover:not(:disabled)
+{
+	background: rgba(255, 255, 255, 0.03);
+	border-color: rgba(255, 255, 255, 0.15);
+	color: #ffffff;
+	box-shadow: none;
+}
+
+.yugen-downtime .outline-btn.danger-hover:hover:not(:disabled)
+{
+	border-color: rgba(244, 63, 94, 0.25);
+	color: #f43f5e;
+	background: rgba(244, 63, 94, 0.05);
+}
+
+.yugen-downtime .compact-btn
+{
+	padding: 4px 10px;
+	font-size: 0.8rem;
+	border-radius: 6px;
+}
+
+.yugen-downtime .buy-btn
+{
+	width: 100%;
+}
+
+/** clean empty banners **/
+.yugen-downtime .empty-banner
+{
+	display: flex;
+	align-items: center;
+	gap: 18px;
+	padding: 20px 24px;
+	border-radius: 12px;
+	background: rgba(255, 255, 255, 0.01);
+	border: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.yugen-downtime .empty-banner i
+{
+	font-size: 1.6rem;
+}
+
+.yugen-downtime .empty-banner.warning i
+{
+	color: #fbbf24;
+}
+
+.yugen-downtime .empty-banner.danger i
+{
+	color: #f43f5e;
+}
+
+.yugen-downtime .banner-text h4
+{
+	margin: 0 0 4px 0;
+	font-size: 0.95rem;
+	color: #ffffff;
+	font-weight: 600;
+}
+
+.yugen-downtime .banner-text p
+{
+	margin: 0;
+	font-size: 0.85rem;
+	color: #64748b;
+}
+
+/** activity timeline style **/
+.yugen-downtime .history-section
+{
+	margin-top: 32px;
+	border-top: 1px solid rgba(255, 255, 255, 0.05);
+	padding-top: 24px;
+}
+
+.yugen-downtime .section-title-row
+{
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 16px;
+	height: 32px;
+}
+
+.yugen-downtime .section-heading
+{
+	font-size: 0.85rem;
+	font-weight: 700;
+	color: #64748b;
+	text-transform: uppercase;
+	letter-spacing: 1px;
+	margin: 0;
+}
+
+.yugen-downtime .logs-feed
+{
+	background: rgba(255, 255, 255, 0.01);
+	border: 1px solid rgba(255, 255, 255, 0.03);
+	border-radius: 10px;
+	padding: 8px;
+	max-height: 160px;
+	overflow-y: auto;
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+.yugen-downtime .feed-item
+{
+	display: flex;
+	gap: 16px;
+	padding: 8px 12px;
+	border-radius: 6px;
+	font-size: 0.85rem;
+	align-items: baseline;
+	border-bottom: 1px solid rgba(255, 255, 255, 0.01);
+}
+
+.yugen-downtime .feed-item:hover
+{
+	background: rgba(255, 255, 255, 0.01);
+}
+
+.yugen-downtime .item-time
+{
+	color: #475569;
+	font-size: 0.75rem;
+	font-family: monospace;
+	white-space: nowrap;
+}
+
+.yugen-downtime .item-text
+{
+	color: #cbd5e1;
+	line-height: 1.4;
+}
+
+.yugen-downtime .item-text strong
+{
+	color: #ffffff;
+}
+
+.yugen-downtime .success-text
+{
+	color: #10b981;
+	font-weight: 600;
+}
+
+.yugen-downtime .failure-text
+{
+	color: #f43f5e;
+	font-weight: 600;
+}
+
+.yugen-downtime .feed-empty
+{
+	color: #475569;
+	font-size: 0.85rem;
+	text-align: center;
+	padding: 24px;
+}
+
+/** gm control panel (manage view) **/
+.yugen-downtime .manage-tab
+{
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+	height: 100%;
+	overflow: hidden;
+}
+
+.yugen-downtime .gm-top-panel
+{
+	background: rgba(255, 255, 255, 0.01);
+	border: 1px solid rgba(255, 255, 255, 0.04);
+	padding: 16px 20px;
+	border-radius: 12px;
+}
+
+.yugen-downtime .mode-toggle-group
+{
+	display: flex;
+	align-items: center;
+	gap: 16px;
+}
+
+.yugen-downtime .toggle-info
+{
+	display: flex;
+	flex-direction: column;
+}
+
+.yugen-downtime .toggle-title
+{
+	font-size: 0.95rem;
+	font-weight: 600;
+	color: #ffffff;
+}
+
+.yugen-downtime .toggle-desc
+{
+	font-size: 0.8rem;
+	color: #64748b;
+	margin-top: 2px;
+}
+
+/** minimal switch styling **/
+.yugen-downtime .ios-switch
+{
+	position: relative;
+	display: inline-block;
+	width: 44px;
+	height: 24px;
+	flex-shrink: 0;
+}
+
+.yugen-downtime .ios-switch input
+{
+	opacity: 0;
+	width: 0;
+	height: 0;
+}
+
+.yugen-downtime .switch-slider
+{
+	position: absolute;
+	cursor: pointer;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background-color: rgba(255, 255, 255, 0.06);
+	transition: .2s ease;
+	border-radius: 24px;
+	border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.yugen-downtime .switch-slider:before
+{
+	position: absolute;
+	content: "";
+	height: 18px;
+	width: 18px;
+	left: 2px;
+	bottom: 2px;
+	background-color: #94a3b8;
+	transition: .2s ease;
+	border-radius: 50%;
+}
+
+.yugen-downtime input:checked + .switch-slider
+{
+	background-color: #38bdf8;
+	border-color: rgba(56, 189, 248, 0.2);
+}
+
+.yugen-downtime input:checked + .switch-slider:before
+{
+	transform: translateX(20px);
+	background-color: #ffffff;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/** gm dynamic layout grid **/
+.yugen-downtime .gm-main-layout
+{
+	display: grid;
+	grid-template-columns: 240px 1fr;
+	gap: 20px;
+	flex: 1 1 auto;
+	min-height: 0;
+}
+
+.yugen-downtime .layout-sidebar
+{
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	overflow: hidden;
+	border-right: 1px solid rgba(255, 255, 255, 0.04);
+	padding-right: 20px;
+	min-height: 0;
+}
+
+.yugen-downtime .layout-content
+{
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	overflow: hidden;
+	min-height: 0;
+}
+
+/** side bar character point feed **/
+.yugen-downtime .actors-feed
+{
+	background: rgba(255, 255, 255, 0.01);
+	border: 1px solid rgba(255, 255, 255, 0.03);
+	border-radius: 10px;
+	padding: 8px;
+	overflow-y: auto;
+	flex-grow: 1;
+	min-height: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+
+.yugen-downtime .actor-feed-item
+{
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	padding: 8px;
+	border-radius: 8px;
+	border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+	background: rgba(255, 255, 255, 0.005);
+}
+
+.yugen-downtime .actor-row-main
+{
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	width: 100%;
+}
+
+.yugen-downtime .actor-row-rates
+{
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-top: 2px;
+	padding-top: 4px;
+	border-top: 1px dashed rgba(255, 255, 255, 0.04);
+	width: 100%;
+}
+
+.yugen-downtime .rates-label
+{
+	font-size: 0.72rem;
+	color: #64748b;
+	font-weight: 500;
+}
+
+.yugen-downtime .rates-inputs
+{
+	display: flex;
+	gap: 4px;
+}
+
+.yugen-downtime input.actor-rate-input
+{
+	width: 38px !important;
+	height: 22px !important;
+	text-align: center !important;
+	padding: 2px 4px !important;
+	font-size: 0.75rem !important;
+	font-weight: 600 !important;
+	border: 1px solid rgba(255, 255, 255, 0.08) !important;
+	background: rgba(15, 23, 42, 0.4) !important;
+	border-radius: 4px !important;
+	color: #38bdf8 !important;
+}
+
+.yugen-downtime input.actor-rate-input:hover
+{
+	border-color: rgba(56, 189, 248, 0.3) !important;
+}
+
+.yugen-downtime input.actor-rate-input:focus
+{
+	border-color: #38bdf8 !important;
+	background: rgba(15, 23, 42, 0.7) !important;
+	box-shadow: 0 0 6px rgba(56, 189, 248, 0.2) !important;
+}
+
+.yugen-downtime .actor-avatar
+{
+	width: 28px;
+	height: 28px;
+	border-radius: 50%;
+	border: 1px solid rgba(255, 255, 255, 0.1);
+	object-fit: cover;
+}
+
+.yugen-downtime .actor-feed-item .actor-name
+{
+	font-size: 0.85rem;
+	font-weight: 500;
+	color: #cbd5e1;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	flex-grow: 1;
+}
+
+/** input fields inside actor point configurations **/
+.yugen-downtime input.actor-points-input
+{
+	width: 55px !important;
+	text-align: center !important;
+	padding: 4px 8px !important;
+	font-weight: 600 !important;
+	border: 1px solid rgba(255, 255, 255, 0.12) !important;
+	background: rgba(15, 23, 42, 0.6) !important;
+	border-radius: 6px !important;
+	color: #ffffff !important;
+}
+
+.yugen-downtime input.actor-points-input:hover
+{
+	border-color: rgba(56, 189, 248, 0.4) !important;
+}
+
+.yugen-downtime input.actor-points-input:focus
+{
+	border-color: #38bdf8 !important;
+	background: rgba(15, 23, 42, 0.8) !important;
+	box-shadow: 0 0 8px rgba(56, 189, 248, 0.3) !important;
+}
+
+/** config cards list on manage view **/
+.yugen-downtime .config-cards-list
+{
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	overflow-y: auto;
+	flex-grow: 1;
+	min-height: 0;
+	padding-right: 6px;
+}
+
+.yugen-downtime .config-card
+{
+	background: rgba(255, 255, 255, 0.01);
+	border: 1px solid rgba(255, 255, 255, 0.04);
+	border-radius: 12px;
+	padding: 14px;
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.yugen-downtime .config-header
+{
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: 12px;
+}
+
+.yugen-downtime input.config-name-input
+{
+	background: transparent !important;
+	border: none !important;
+	border-bottom: 1px solid transparent !important;
+	color: #ffffff !important;
+	padding: 4px 0 !important;
+	font-size: 1.05rem !important;
+	font-weight: 600 !important;
+	flex-grow: 1;
+	border-radius: 0 !important;
+	box-shadow: none !important;
+}
+
+.yugen-downtime input.config-name-input:focus
+{
+	border-bottom-color: rgba(255, 255, 255, 0.1) !important;
+	background: transparent !important;
+}
+
+.yugen-downtime .config-delete-btn
+{
+	background: rgba(255, 255, 255, 0.02) !important;
+	border: 1px solid rgba(255, 255, 255, 0.04) !important;
+	color: #64748b !important;
+	border-radius: 8px;
+	width: 32px;
+	height: 32px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+	transition: all 0.2s ease;
+}
+
+.yugen-downtime .config-delete-btn:hover
+{
+	background: rgba(244, 63, 94, 0.05) !important;
+	border-color: rgba(244, 63, 94, 0.2) !important;
+	color: #f43f5e !important;
+}
+
+.yugen-downtime textarea.config-desc-textarea
+{
+	background: rgba(0, 0, 0, 0.15) !important;
+	border: 1px solid rgba(255, 255, 255, 0.04) !important;
+	border-radius: 8px !important;
+	color: #94a3b8 !important;
+	padding: 8px 12px !important;
+	font-size: 0.85rem !important;
+	line-height: 1.4 !important;
+	height: 46px;
+	resize: vertical;
+}
+
+.yugen-downtime textarea.config-desc-textarea:focus
+{
+	color: #ffffff !important;
+}
+
+/** premium grid layout for configuration details **/
+.yugen-downtime .config-form-grid
+{
+	display: grid;
+	grid-template-columns: repeat(4, 1fr);
+	gap: 12px;
+}
+
+.yugen-downtime .form-field
+{
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+
+.yugen-downtime .field-label
+{
+	font-size: 0.65rem;
+	font-weight: 700;
+	color: #64748b;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+}
+
+.yugen-downtime .field-input,
+.yugen-downtime .field-select
+{
+	background: rgba(0, 0, 0, 0.2) !important;
+	border: 1px solid rgba(255, 255, 255, 0.04) !important;
+	border-radius: 6px !important;
+	color: #ffffff !important;
+	padding: 6px 10px !important;
+	width: 100% !important;
+	font-size: 0.8rem !important;
+	height: 30px !important;
+}
+
+.yugen-downtime select.field-select
+{
+	cursor: pointer;
+}
+
+.yugen-downtime .field-input:focus,
+.yugen-downtime .field-select:focus
+{
+	border-color: #38bdf8 !important;
+	background: rgba(0, 0, 0, 0.3) !important;
+}
+
+/** gm audit trail timeline **/
+.yugen-downtime .gm-logs-panel
+{
+	margin-top: 10px;
+	flex: 0 1 180px;
+	min-height: 0;
+}
