@@ -15,13 +15,10 @@ export const get_scene_control_buttons_hook = ( ): void =>
 			name: 'yugen-downtime-tool',
 			title: 'yugen-downtime',
 			icon: 'fas fa-hourglass-half',
-			onChange: ( active: boolean ) => 
+			onClick: ( ) => 
 			{
-				if ( active ) 
-				{
-					const app = DowntimeApp.instance;
-					app.render( { force: true } );
-				}
+				const app = DowntimeApp.instance;
+				app.render( { force: true } );
 			},
 			button: true
 		};
