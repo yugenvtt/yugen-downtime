@@ -2,7 +2,7 @@
 	"id": "yugen-downtime",
 	"title": "yugen-downtime",
 	"description": "downtime action manager for players to invest downtime points into macro actions.",
-	"version": "1.0.1",
+	"version": "1.0.3",
 	"library": false,
 	"authors": [
 		{
@@ -30,13 +30,16 @@
 	},
 	"url": "https://github.com/yugenvtt/yugen-downtime",
 	"manifest": "https://raw.githubusercontent.com/yugenvtt/yugen-downtime/refs/heads/main/static/module.json",
-	"download": "https://github.com/yugenvtt/yugen-downtime/releases/download/1.0.1/module.zip",
+	"download": "https://github.com/yugenvtt/yugen-downtime/releases/download/1.0.3/module.zip",
 	"relationships": {
 		"requires": [
 			{
 				"id": "yugen-utils",
 				"type": "module",
-				"manifest": "https://raw.githubusercontent.com/yugenvtt/yugen-utils/refs/heads/main/static/module.json"
+				"manifest": "https://raw.githubusercontent.com/yugenvtt/yugen-utils/refs/heads/main/static/module.json",
+				"compatibility": {
+					"minimum": "1.0.1"
+				}
 			}
 		]
 	},

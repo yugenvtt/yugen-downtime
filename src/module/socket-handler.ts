@@ -5,6 +5,7 @@
 
 import { MODULE_ID, FLAGS, SETTINGS } from './constants.js';
 import { get_flag, set_flag, log, debug } from './utils.js';
+import { CraftHandler } from './craft-handler.js';
 
 export class SocketHandler 
 {
@@ -48,9 +49,42 @@ export class SocketHandler
 					console.error( `${ MODULE_ID } | buy action execution failed:`, err );
 				} );
 			}
+
+			/** handle craft-item on gm client **/
+			if ( data.action === 'craft-item' )
+			{
+				CraftHandler.handle_craft( data ).catch( ( err ) =>
+				{
+					console.error( `${ MODULE_ID } | craft execution failed:`, err );
+				} );
+			}
 		} );
 
 		this._registered = true;
+	}
+
+	/**
+	 * emits a craft request to the gm, or runs it directly if the user is a gm.
+	 **/
+	public static async emit_craft( actor_id: string, recipe_id: string ): Promise<void>
+	{
+		const data =
+		{
+			action: 'craft-item',
+			actor_id,
+			recipe_id
+		};
+
+		if ( ( game as any ).user.isGM )
+		{
+			await CraftHandler.handle_craft( data );
+		}
+		else
+		{
+			log( 'user is not gm, sending craft request via socket' );
+			/** lowercase purpose of the api call **/
+			( game as any ).socket.emit( `module.${ MODULE_ID }`, data );
+		}
 	}
 
 	/**

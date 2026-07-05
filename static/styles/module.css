@@ -1,91 +1,14 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
-
-/** global application overrides **/
-.yugen-downtime.app,
-.yugen-downtime input,
-.yugen-downtime select,
-.yugen-downtime textarea,
-.yugen-downtime button:not(.header-control):not(.close),
-.yugen-downtime select option
-{
-	font-family: 'Outfit', sans-serif !important;
-}
-
-/** premium minimal window theme **/
+/** allow the absolutely positioned close button to escape the app boundary **/
 .yugen-downtime.app
 {
-	background: #090a0f !important;
-	border: 1px solid rgba(255, 255, 255, 0.05) !important;
-	border-image: none !important;
-	border-radius: 14px !important;
-	box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8) !important;
-	color: #e2e8f0 !important;
+	overflow: visible !important;
+}
+
+/** re-clip the inner content so scroll still works **/
+.yugen-downtime.app .window-content
+{
 	overflow: hidden !important;
-}
-
-/** window header **/
-.yugen-downtime.app .window-header
-{
-	background: transparent !important;
-	border-bottom: none !important;
-	border-image: none !important;
-	padding: 0 !important;
-	height: 0 !important;
-	min-height: 0 !important;
-	position: static !important;
-}
-
-.yugen-downtime.app .window-header .window-title
-{
-	display: none !important;
-}
-
-/** premium window header close button **/
-.yugen-downtime.app .window-header button.header-control,
-.yugen-downtime.app .window-header [data-action="close"],
-.yugen-downtime.app .window-header button.close,
-.yugen-downtime.app .window-header .close,
-.yugen-downtime.app .window-header .header-control,
-.yugen-downtime.app button.header-control,
-.yugen-downtime.app [data-action="close"],
-.yugen-downtime.app button.close,
-.yugen-downtime.app .close,
-.yugen-downtime.app .header-control
-{
-	color: #64748b !important;
-	background: rgba(255, 255, 255, 0.03) !important;
-	border: 1px solid rgba(255, 255, 255, 0.05) !important;
-	border-radius: 8px !important;
-	width: 28px !important;
-	height: 28px !important;
-	display: flex !important;
-	align-items: center !important;
-	justify-content: center !important;
-	cursor: pointer !important;
-	transition: all 0.2s ease !important;
-	padding: 0 !important;
-	font-size: 0.85rem !important;
-	box-shadow: none !important;
-	position: absolute !important;
-	top: 14px !important;
-	right: 14px !important;
-	z-index: 100 !important;
-}
-
-.yugen-downtime.app .window-header button.header-control:hover,
-.yugen-downtime.app .window-header [data-action="close"]:hover,
-.yugen-downtime.app .window-header button.close:hover,
-.yugen-downtime.app .window-header .close:hover,
-.yugen-downtime.app .window-header .header-control:hover,
-.yugen-downtime.app button.header-control:hover,
-.yugen-downtime.app [data-action="close"]:hover,
-.yugen-downtime.app button.close:hover,
-.yugen-downtime.app .close:hover,
-.yugen-downtime.app .header-control:hover
-{
-	color: #f43f5e !important;
-	background: rgba(244, 63, 94, 0.1) !important;
-	border-color: rgba(244, 63, 94, 0.25) !important;
+	border-radius: var( --yugen-border-radius-lg );
 }
 
 .yugen-downtime .downtime-app-container
@@ -94,6 +17,7 @@
 	display: flex;
 	flex-direction: column;
 }
+
 
 /** floating capsule navigation bar **/
 .yugen-downtime .downtime-header
@@ -110,7 +34,7 @@
 {
 	font-size: 1.15rem;
 	font-weight: 700;
-	color: #38bdf8;
+	color: var(--yugen-accent);
 	margin: 0;
 	letter-spacing: -0.25px;
 	text-transform: lowercase;
@@ -127,7 +51,7 @@
 
 .yugen-downtime nav.sheet-tabs a.item
 {
-	color: #94a3b8;
+	color: var(--yugen-text-secondary);
 	padding: 6px 16px;
 	font-size: 0.85rem;
 	font-weight: 600;
@@ -194,7 +118,7 @@
 	font-size: 0.7rem;
 	text-transform: uppercase;
 	letter-spacing: 1.5px;
-	color: #64748b;
+	color: var(--yugen-text-muted);
 	font-weight: 700;
 	margin-bottom: 4px;
 }
@@ -225,14 +149,14 @@
 {
 	font-size: 2rem;
 	font-weight: 700;
-	color: #38bdf8;
+	color: var(--yugen-accent);
 	line-height: 1;
 }
 
 .yugen-downtime .hero-points-card .points-lbl
 {
 	font-size: 0.75rem;
-	color: #64748b;
+	color: var(--yugen-text-muted);
 	text-transform: uppercase;
 	font-weight: 600;
 	letter-spacing: 0.5px;
@@ -290,9 +214,9 @@
 {
 	font-size: 0.8rem;
 	font-weight: 600;
-	color: #38bdf8;
-	background: rgba(56, 189, 248, 0.08);
-	border: 1px solid rgba(56, 189, 248, 0.15);
+	color: var(--yugen-accent);
+	background: var(--yugen-accent-trans);
+	border: 1px solid var(--yugen-accent-border);
 	padding: 2px 8px;
 	border-radius: 6px;
 }
@@ -300,7 +224,7 @@
 .yugen-downtime .card-desc
 {
 	font-size: 0.85rem;
-	color: #94a3b8;
+	color: var(--yugen-text-secondary);
 	line-height: 1.5;
 	margin: 0 0 18px 0;
 	flex-grow: 1;
@@ -381,7 +305,7 @@
 .yugen-downtime .outline-btn
 {
 	background: transparent;
-	color: #e2e8f0;
+	color: var(--yugen-text-primary);
 	border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
@@ -395,8 +319,8 @@
 
 .yugen-downtime .outline-btn.danger-hover:hover:not(:disabled)
 {
-	border-color: rgba(244, 63, 94, 0.25);
-	color: #f43f5e;
+	border-color: var(--yugen-danger-border);
+	color: var(--yugen-danger);
 	background: rgba(244, 63, 94, 0.05);
 }
 
@@ -436,7 +360,7 @@
 
 .yugen-downtime .empty-banner.danger i
 {
-	color: #f43f5e;
+	color: var(--yugen-danger);
 }
 
 .yugen-downtime .banner-text h4
@@ -451,7 +375,7 @@
 {
 	margin: 0;
 	font-size: 0.85rem;
-	color: #64748b;
+	color: var(--yugen-text-muted);
 }
 
 /** activity timeline style **/
@@ -475,7 +399,7 @@
 {
 	font-size: 0.85rem;
 	font-weight: 700;
-	color: #64748b;
+	color: var(--yugen-text-muted);
 	text-transform: uppercase;
 	letter-spacing: 1px;
 	margin: 0;
@@ -537,7 +461,7 @@
 
 .yugen-downtime .failure-text
 {
-	color: #f43f5e;
+	color: var(--yugen-danger);
 	font-weight: 600;
 }
 
@@ -563,8 +487,11 @@
 {
 	background: rgba(255, 255, 255, 0.01);
 	border: 1px solid rgba(255, 255, 255, 0.04);
-	padding: 16px 20px;
+	padding: 12px 20px;
 	border-radius: 12px;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
 }
 
 .yugen-downtime .mode-toggle-group
@@ -590,7 +517,7 @@
 .yugen-downtime .toggle-desc
 {
 	font-size: 0.8rem;
-	color: #64748b;
+	color: var(--yugen-text-muted);
 	margin-top: 2px;
 }
 
@@ -633,14 +560,14 @@
 	width: 18px;
 	left: 2px;
 	bottom: 2px;
-	background-color: #94a3b8;
+	background-color: var(--yugen-text-secondary);
 	transition: .2s ease;
 	border-radius: 50%;
 }
 
 .yugen-downtime input:checked + .switch-slider
 {
-	background-color: #38bdf8;
+	background-color: var(--yugen-accent);
 	border-color: rgba(56, 189, 248, 0.2);
 }
 
@@ -729,7 +656,7 @@
 .yugen-downtime .rates-label
 {
 	font-size: 0.72rem;
-	color: #64748b;
+	color: var(--yugen-text-muted);
 	font-weight: 500;
 }
 
@@ -750,7 +677,7 @@
 	border: 1px solid rgba(255, 255, 255, 0.08) !important;
 	background: rgba(15, 23, 42, 0.4) !important;
 	border-radius: 4px !important;
-	color: #38bdf8 !important;
+	color: var(--yugen-accent) !important;
 }
 
 .yugen-downtime input.actor-rate-input:hover
@@ -760,7 +687,7 @@
 
 .yugen-downtime input.actor-rate-input:focus
 {
-	border-color: #38bdf8 !important;
+	border-color: var(--yugen-accent) !important;
 	background: rgba(15, 23, 42, 0.7) !important;
 	box-shadow: 0 0 6px rgba(56, 189, 248, 0.2) !important;
 }
@@ -805,7 +732,7 @@
 
 .yugen-downtime input.actor-points-input:focus
 {
-	border-color: #38bdf8 !important;
+	border-color: var(--yugen-accent) !important;
 	background: rgba(15, 23, 42, 0.8) !important;
 	box-shadow: 0 0 8px rgba(56, 189, 248, 0.3) !important;
 }
@@ -865,7 +792,7 @@
 {
 	background: rgba(255, 255, 255, 0.02) !important;
 	border: 1px solid rgba(255, 255, 255, 0.04) !important;
-	color: #64748b !important;
+	color: var(--yugen-text-muted) !important;
 	border-radius: 8px;
 	width: 32px;
 	height: 32px;
@@ -880,7 +807,7 @@
 {
 	background: rgba(244, 63, 94, 0.05) !important;
 	border-color: rgba(244, 63, 94, 0.2) !important;
-	color: #f43f5e !important;
+	color: var(--yugen-danger) !important;
 }
 
 .yugen-downtime textarea.config-desc-textarea
@@ -888,7 +815,7 @@
 	background: rgba(0, 0, 0, 0.15) !important;
 	border: 1px solid rgba(255, 255, 255, 0.04) !important;
 	border-radius: 8px !important;
-	color: #94a3b8 !important;
+	color: var(--yugen-text-secondary) !important;
 	padding: 8px 12px !important;
 	font-size: 0.85rem !important;
 	line-height: 1.4 !important;
@@ -920,7 +847,7 @@
 {
 	font-size: 0.65rem;
 	font-weight: 700;
-	color: #64748b;
+	color: var(--yugen-text-muted);
 	text-transform: uppercase;
 	letter-spacing: 0.5px;
 }
@@ -946,7 +873,7 @@
 .yugen-downtime .field-input:focus,
 .yugen-downtime .field-select:focus
 {
-	border-color: #38bdf8 !important;
+	border-color: var(--yugen-accent) !important;
 	background: rgba(0, 0, 0, 0.3) !important;
 }
 
@@ -957,3 +884,741 @@
 	flex: 0 1 180px;
 	min-height: 0;
 }
+
+/** in manage tab the layout-content stacks two config lists, so neither should flex-grow **/
+.yugen-downtime .layout-content
+{
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	overflow: hidden;
+}
+
+.yugen-downtime .gm-sub-tabs
+{
+	display: inline-flex;
+	background: rgba(0, 0, 0, 0.2);
+	border: 1px solid rgba(255, 255, 255, 0.04);
+	border-radius: 8px;
+	padding: 3px;
+	gap: 4px;
+	margin-bottom: 16px;
+	flex-shrink: 0;
+}
+
+.yugen-downtime .sub-tab-item
+{
+	flex: 1;
+	background: transparent;
+	color: var(--yugen-text-secondary);
+	border: none;
+	border-radius: 6px;
+	padding: 6px 16px;
+	font-size: 0.82rem;
+	font-weight: 600;
+	font-family: var(--yugen-font-family);
+	cursor: pointer;
+	transition: all 0.2s ease;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+}
+
+.yugen-downtime .sub-tab-item:hover
+{
+	color: #ffffff;
+	background: rgba(255, 255, 255, 0.02);
+}
+
+.yugen-downtime .sub-tab-item.active
+{
+	color: #ffffff;
+	background: rgba(255, 255, 255, 0.06);
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.yugen-downtime .sub-tab-content
+{
+	display: none;
+	height: 100%;
+	flex-direction: column;
+	min-height: 0;
+}
+
+.yugen-downtime .sub-tab-content.active
+{
+	display: flex;
+}
+
+/** ============================
+    crafting system styles
+    ============================ **/
+
+.yugen-downtime .craft-browse-tab
+{
+	overflow-y: auto;
+	height: 100%;
+	padding-right: 6px;
+}
+
+/** recipe card grid **/
+.yugen-downtime .craft-recipes-grid
+{
+	display: grid;
+	grid-template-columns: repeat( auto-fill, minmax( 320px, 1fr ) );
+	gap: 20px;
+}
+
+.yugen-downtime .craft-recipe-card
+{
+	background: rgba( 255, 255, 255, 0.01 );
+	border: 1px solid rgba( 255, 255, 255, 0.04 );
+	border-radius: 12px;
+	padding: 20px;
+	display: flex;
+	flex-direction: column;
+	gap: 14px;
+	transition: all 0.2s cubic-bezier( 0.4, 0, 0.2, 1 );
+}
+
+.yugen-downtime .craft-recipe-card:hover
+{
+	background: rgba( 255, 255, 255, 0.02 );
+	border-color: rgba( 255, 255, 255, 0.08 );
+	transform: translateY( -2px );
+	box-shadow: 0 8px 24px rgba( 0, 0, 0, 0.2 );
+}
+
+.yugen-downtime .craft-recipe-card.disabled
+{
+	opacity: 0.45;
+}
+
+/** two-column ingredient -> output layout inside a card **/
+.yugen-downtime .craft-card-body
+{
+	display: flex;
+	align-items: center;
+	gap: 12px;
+}
+
+.yugen-downtime .craft-ingredients-section
+{
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+
+.yugen-downtime .craft-output-section
+{
+	flex: 0 0 auto;
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	align-items: center;
+}
+
+.yugen-downtime .craft-section-label
+{
+	font-size: 0.65rem;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	color: var( --yugen-text-muted );
+}
+
+.yugen-downtime .craft-ingredients-list
+{
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+.yugen-downtime .craft-ingredient-row
+{
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	font-size: 0.83rem;
+	color: #cbd5e1;
+}
+
+.yugen-downtime .craft-ingredient-row.missing .craft-ing-name,
+.yugen-downtime .craft-ingredient-row.missing .craft-ing-qty
+{
+	color: var( --yugen-danger );
+}
+
+.yugen-downtime .craft-ing-img
+{
+	width: 24px;
+	height: 24px;
+	border-radius: 4px;
+	border: 1px solid rgba( 255, 255, 255, 0.06 );
+	object-fit: cover;
+	flex-shrink: 0;
+}
+
+.yugen-downtime .craft-ing-name
+{
+	flex-grow: 1;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.yugen-downtime .craft-ing-qty
+{
+	font-size: 0.75rem;
+	font-weight: 600;
+	color: var( --yugen-text-muted );
+	white-space: nowrap;
+	font-family: monospace;
+}
+
+.yugen-downtime .craft-no-ingredients
+{
+	font-size: 0.78rem;
+	color: var( --yugen-text-muted );
+	font-style: italic;
+}
+
+/** arrow separator **/
+.yugen-downtime .craft-arrow-col
+{
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+}
+
+.yugen-downtime .craft-arrow
+{
+	color: rgba( 255, 255, 255, 0.15 );
+	font-size: 1rem;
+}
+
+/** output display on browse card **/
+.yugen-downtime .craft-output-display
+{
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 4px;
+}
+
+.yugen-downtime .craft-output-img
+{
+	width: 48px;
+	height: 48px;
+	border-radius: 8px;
+	border: 1px solid rgba( 255, 255, 255, 0.08 );
+	object-fit: cover;
+}
+
+.yugen-downtime .craft-output-name
+{
+	font-size: 0.8rem;
+	font-weight: 600;
+	color: #ffffff;
+	text-align: center;
+	max-width: 90px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.yugen-downtime .craft-output-qty
+{
+	font-size: 0.72rem;
+	color: var( --yugen-accent );
+	font-weight: 600;
+}
+
+/** craft action button variant **/
+.yugen-downtime .craft-btn
+{
+	width: 100% !important;
+}
+
+/** ============================
+    gm recipe editor
+    ============================ **/
+
+.yugen-downtime .craft-manage-tab
+{
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+	height: 100%;
+	overflow: hidden;
+}
+
+.yugen-downtime .craft-manage-layout
+{
+	display: grid;
+	grid-template-columns: 1fr 240px;
+	gap: 20px;
+	flex: 1 1 auto;
+	min-height: 0;
+}
+
+.yugen-downtime .craft-recipes-editor
+{
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	overflow-y: auto;
+	min-height: 0;
+	padding-right: 6px;
+}
+
+.yugen-downtime .craft-recipe-editor-card
+{
+	background: rgba( 255, 255, 255, 0.01 );
+	border: 1px solid rgba( 255, 255, 255, 0.04 );
+	border-radius: 12px;
+	padding: 14px;
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+}
+
+.yugen-downtime .craft-editor-row
+{
+	display: flex;
+	align-items: center;
+	gap: 12px;
+}
+
+.yugen-downtime .craft-cost-field
+{
+	width: 90px;
+}
+
+/** ingredient / output slot row **/
+.yugen-downtime .craft-slots-row
+{
+	display: flex;
+	align-items: flex-start;
+	gap: 12px;
+}
+
+.yugen-downtime .craft-slot-column
+{
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+
+.yugen-downtime .craft-output-column
+{
+	flex: 0 0 160px;
+}
+
+.yugen-downtime .craft-slot-label
+{
+	font-size: 0.65rem;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	color: var( --yugen-text-muted );
+}
+
+/** drop zones **/
+.yugen-downtime .drop-slot
+{
+	background: rgba( 0, 0, 0, 0.15 );
+	border: 1px dashed rgba( 255, 255, 255, 0.06 );
+	border-radius: 10px;
+	padding: 8px;
+	min-height: 60px;
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	transition: all 0.15s ease;
+}
+
+.yugen-downtime .drop-slot.drag-over
+{
+	border-color: var( --yugen-accent );
+	background: rgba( 56, 189, 248, 0.04 );
+	box-shadow: 0 0 12px rgba( 56, 189, 248, 0.1 );
+}
+
+.yugen-downtime .craft-drop-hint
+{
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 6px;
+	color: rgba( 255, 255, 255, 0.12 );
+	font-size: 0.75rem;
+	padding: 6px;
+}
+
+.yugen-downtime .drop-slot.drag-over .craft-drop-hint
+{
+	color: var( --yugen-accent );
+}
+
+.yugen-downtime .craft-slot-items
+{
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+.yugen-downtime .craft-slot-item
+{
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	padding: 4px 6px;
+	border-radius: 6px;
+	background: rgba( 255, 255, 255, 0.02 );
+}
+
+.yugen-downtime .craft-output-slot-item
+{
+	flex-direction: column;
+	align-items: center;
+}
+
+.yugen-downtime input.craft-qty-input
+{
+	width: 40px !important;
+	height: 22px !important;
+	text-align: center !important;
+	padding: 2px 4px !important;
+	font-size: 0.75rem !important;
+	font-weight: 600 !important;
+	border: 1px solid rgba( 255, 255, 255, 0.08 ) !important;
+	background: rgba( 15, 23, 42, 0.4 ) !important;
+	border-radius: 4px !important;
+	color: var( --yugen-accent ) !important;
+	flex-shrink: 0;
+}
+
+.yugen-downtime .craft-remove-btn
+{
+	background: transparent !important;
+	border: none !important;
+	color: rgba( 255, 255, 255, 0.2 ) !important;
+	width: 20px;
+	height: 20px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+	border-radius: 4px;
+	font-size: 0.7rem;
+	flex-shrink: 0;
+	transition: color 0.15s ease;
+}
+
+.yugen-downtime .craft-remove-btn:hover
+{
+	color: var( --yugen-danger ) !important;
+}
+
+/** craft logs sidebar **/
+.yugen-downtime .craft-logs-sidebar
+{
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	border-left: 1px solid rgba( 255, 255, 255, 0.04 );
+	padding-left: 16px;
+	overflow: hidden;
+}
+
+.yugen-downtime .craft-logs-feed
+{
+	max-height: none;
+	flex-grow: 1;
+}
+
+.yugen-downtime .craft-empty-recipes
+{
+	padding: 32px 0;
+	text-align: center;
+	font-size: 0.85rem;
+	color: var( --yugen-text-muted );
+}
+
+/** gm configurations list view **/
+.yugen-downtime .config-list
+{
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	margin-top: 10px;
+}
+
+.yugen-downtime .config-row-item
+{
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 10px 14px;
+	border: 1px solid rgba(255, 255, 255, 0.04);
+	border-radius: 8px;
+	background: rgba(255, 255, 255, 0.01);
+	transition: all 0.2s ease;
+}
+
+.yugen-downtime .config-row-item:hover
+{
+	background: rgba(255, 255, 255, 0.02);
+	border-color: rgba(255, 255, 255, 0.08);
+}
+
+.yugen-downtime .config-row-main
+{
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	flex-grow: 1;
+}
+
+.yugen-downtime .config-row-name
+{
+	font-weight: 600;
+	font-size: 0.95rem;
+	color: #ffffff;
+}
+
+.yugen-downtime .config-row-badges
+{
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+}
+
+.yugen-downtime .row-badge
+{
+	font-size: 0.7rem;
+	padding: 2px 6px;
+	border-radius: 4px;
+	background: rgba(255, 255, 255, 0.04);
+	color: var(--yugen-text-secondary);
+}
+
+.yugen-downtime .row-badge.cost-badge
+{
+	background: rgba(56, 189, 248, 0.08);
+	color: var(--yugen-accent);
+	border: 1px solid rgba(56, 189, 248, 0.15);
+}
+
+.yugen-downtime .row-badge.check-badge
+{
+	background: rgba(245, 158, 11, 0.08);
+	color: #f59e0b;
+	border: 1px solid rgba(245, 158, 11, 0.15);
+}
+
+.yugen-downtime .row-badge.macro-badge
+{
+	background: rgba(168, 85, 247, 0.08);
+	color: #a855f7;
+	border: 1px solid rgba(168, 85, 247, 0.15);
+}
+
+.yugen-downtime .row-badge.output-badge
+{
+	background: rgba(16, 185, 129, 0.08);
+	color: #10b981;
+	border: 1px solid rgba(16, 185, 129, 0.15);
+}
+
+.yugen-downtime .config-row-actions
+{
+	display: flex;
+	gap: 6px;
+	flex-shrink: 0;
+}
+
+.yugen-downtime .config-row-btn
+{
+	background: rgba(255, 255, 255, 0.02) !important;
+	border: 1px solid rgba(255, 255, 255, 0.04) !important;
+	color: var(--yugen-text-muted) !important;
+	border-radius: 6px;
+	width: 28px;
+	height: 28px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+	transition: all 0.2s ease;
+	font-size: 0.8rem;
+	padding: 0 !important;
+	margin: 0 !important;
+	line-height: 1 !important;
+}
+
+.yugen-downtime .config-row-btn i
+{
+	font-size: 0.85rem !important;
+	line-height: 1 !important;
+	margin: 0 !important;
+	padding: 0 !important;
+	display: inline-block !important;
+}
+
+.yugen-downtime .config-row-btn.edit-btn:hover
+{
+	background: rgba(56, 189, 248, 0.08) !important;
+	border-color: rgba(56, 189, 248, 0.2) !important;
+	color: var(--yugen-accent) !important;
+}
+
+.yugen-downtime .config-row-btn.edit-btn i
+{
+	margin-left: 2px !important;
+}
+
+.yugen-downtime .config-row-btn.delete-btn:hover
+{
+	background: rgba(244, 63, 94, 0.08) !important;
+	border-color: rgba(244, 63, 94, 0.2) !important;
+	color: var(--yugen-danger) !important;
+}
+
+/** map filter button **/
+.yugen-downtime .map-filter-btn
+{
+	background: transparent !important;
+	border: 1px solid transparent !important;
+	color: var(--yugen-text-muted) !important;
+	cursor: pointer;
+	border-radius: 4px;
+	width: 24px;
+	height: 24px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	transition: all 0.2s ease;
+	font-size: 0.85rem;
+}
+
+.yugen-downtime .map-filter-btn:hover
+{
+	color: var(--yugen-accent) !important;
+}
+
+.yugen-downtime .map-filter-btn.active
+{
+	color: var(--yugen-accent) !important;
+	background: rgba(56, 189, 248, 0.08) !important;
+	border-color: rgba(56, 189, 248, 0.15) !important;
+}
+
+/** popup editors **/
+.yugen-app.action-editor,
+.yugen-app.recipe-editor
+{
+	padding: 16px !important;
+}
+
+.yugen-app.action-editor .editor-content,
+.yugen-app.recipe-editor .editor-content
+{
+	display: flex;
+	flex-direction: column;
+	gap: 14px;
+}
+
+.yugen-app.action-editor .form-group,
+.yugen-app.recipe-editor .form-group
+{
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	border: none !important;
+	padding: 0 !important;
+	margin: 0 !important;
+}
+
+.yugen-app.action-editor .form-group label,
+.yugen-app.recipe-editor .form-group label
+{
+	font-size: 0.65rem;
+	font-weight: 700;
+	color: var(--yugen-text-muted);
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+}
+
+.yugen-app.action-editor .form-fields input,
+.yugen-app.action-editor .form-fields select,
+.yugen-app.action-editor .form-fields textarea,
+.yugen-app.recipe-editor .form-fields input,
+.yugen-app.recipe-editor .form-fields textarea
+{
+	background: rgba(0, 0, 0, 0.2) !important;
+	border: 1px solid rgba(255, 255, 255, 0.04) !important;
+	border-radius: 6px !important;
+	color: #ffffff !important;
+	padding: 6px 10px !important;
+	width: 100% !important;
+	font-size: 0.8rem !important;
+	box-shadow: none !important;
+}
+
+.yugen-app.action-editor .form-fields select,
+.yugen-app.recipe-editor .form-fields select
+{
+	height: 30px !important;
+}
+
+.yugen-app.action-editor .form-fields textarea,
+.yugen-app.recipe-editor .form-fields textarea
+{
+	min-height: 80px;
+	resize: vertical;
+}
+
+.yugen-app.action-editor .sheet-footer,
+.yugen-app.recipe-editor .sheet-footer
+{
+	margin-top: 16px;
+	display: flex;
+	justify-content: flex-end;
+}
+
+.yugen-app.action-editor .sheet-footer button,
+.yugen-app.recipe-editor .sheet-footer button
+{
+	background: var(--yugen-accent) !important;
+	color: #1e293b !important;
+	border: none !important;
+	padding: 8px 16px !important;
+	font-weight: 700 !important;
+	border-radius: 6px !important;
+	cursor: pointer !important;
+	transition: all 0.2s ease !important;
+	box-shadow: none !important;
+}
+
+.yugen-app.action-editor .sheet-footer button:hover,
+.yugen-app.recipe-editor .sheet-footer button:hover
+{
+	background: #7dd3fc !important;
+	box-shadow: 0 0 12px rgba(56, 189, 248, 0.3) !important;
+}
+
+.yugen-app.action-editor .hint,
+.yugen-app.recipe-editor .hint
+{
+	font-size: 0.75rem;
+	color: var(--yugen-text-muted);
+	margin-top: 4px;
+}
+
+

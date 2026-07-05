@@ -19,5 +19,8 @@ export const SETTINGS =
 	LOGS: 'logs',
 	DEBUG_MODE: 'debug-mode',
 	REST_SHORT_POINTS: 'rest-short-points',
-	REST_LONG_POINTS: 'rest-long-points'
+	REST_LONG_POINTS: 'rest-long-points',
+	CRAFT_ENABLED: 'craft-enabled',
+	RECIPES: 'recipes',
+	CRAFT_LOGS: 'craft-logs'
 };
