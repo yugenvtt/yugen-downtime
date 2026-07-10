@@ -13,3 +13,6 @@ See examples below for practical usage:
 - Automatic Downtime Points for Long Rest and Short Rests.
 - Multiple Downtime Actions that can be assigned to macros. Checks and rolls are automatically handled.
 - Logging system to keep track of downtime actions and points.
+
+
+![Interactive Selection Wheel](./.github/assets/interactive_wheel.png)

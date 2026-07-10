@@ -3,7 +3,7 @@
  * adds a tool button to the scene controls for opening the downtime manager.
  **/
 
-import { DowntimeApp } from '../module/downtime-app.js';
+import { InteractiveDowntimeApp } from '../module/interactive-app.js';
 
 export const get_scene_control_buttons_hook = ( ): void => 
 {
@@ -17,8 +17,7 @@ export const get_scene_control_buttons_hook = ( ): void =>
 			icon: 'fas fa-hourglass-half',
 			onClick: ( ) => 
 			{
-				const app = DowntimeApp.instance;
-				app.render( { force: true } );
+				InteractiveDowntimeApp.open( );
 			},
 			button: true
 		};

@@ -1,0 +1,114 @@
+<div class="recipe-editor-container">
+	<div class="editor-content">
+		<div class="form-group">
+			<label>Recipe Name</label>
+			<div class="form-fields">
+				<input type="text" name="name" value="{{recipe.name}}" placeholder="New Recipe Name" required>
+			</div>
+		</div>
+
+		<div class="form-group">
+			<label>Downtime Point Cost</label>
+			<div class="form-fields">
+				<input type="number" name="dt_cost" value="{{recipe.dt_cost}}" min="0" step="1">
+			</div>
+		</div>
+
+		<div class="form-group stacked">
+			<label>Description</label>
+			<div class="form-fields">
+				<textarea name="description" placeholder="A brief explanation of the crafting recipe...">{{recipe.description}}</textarea>
+			</div>
+		</div>
+
+		<div class="form-group">
+			<label>Trigger Macro</label>
+			<div class="form-fields">
+				<select name="macro_id">
+					{{selectOptions macros selected=recipe.macro_id nameAttr="id" labelAttr="name" blank="None"}}
+				</select>
+			</div>
+		</div>
+
+		<div class="form-group">
+			<label>Active Effect Reward</label>
+			<div class="form-fields">
+				{{#if recipe.effect}}
+				<span style="font-size: 0.8rem; color: #10b981; font-weight: 700; display: inline-flex; align-items: center; gap: 4px; padding-right: 8px;">
+					<i class="fas fa-check-circle"></i> Configured ({{recipe.effect.name}})
+				</span>
+				<button type="button" class="effect-control-btn" data-action="edit-effect" title="Edit Active Effect">
+					<i class="fas fa-edit"></i> Edit
+				</button>
+				<button type="button" class="effect-control-btn" data-action="remove-effect" title="Remove Active Effect" style="color: #f87171 !important;">
+					<i class="fas fa-trash-alt"></i> Remove
+				</button>
+				{{else}}
+				<button type="button" class="effect-control-btn" data-action="create-effect" style="flex: 1 !important; width: auto !important;">
+					<i class="fas fa-plus"></i> Configure Active Effect
+				</button>
+				{{/if}}
+			</div>
+		</div>
+
+		<div class="craft-slots-row">
+			<div class="craft-slot-column">
+				<span class="craft-slot-label">Ingredients</span>
+				<div class="drop-slot craft-ingredient-slot" data-slot-type="ingredient">
+					{{#if recipe.ingredients.length}}
+					<div class="craft-slot-items">
+						{{#each recipe.ingredients}}
+						<div class="craft-slot-item">
+							<img class="craft-ing-img" src="{{this.img}}" alt="{{this.name}}">
+							<span class="craft-ing-name">{{this.name}}</span>
+							<input type="number" class="craft-qty-input" value="{{this.quantity}}" min="1"
+								data-action="edit-ingredient-qty"
+								data-ingredient-uuid="{{this.uuid}}">
+							<button type="button" class="craft-remove-btn" data-action="remove-ingredient"
+								data-ingredient-uuid="{{this.uuid}}">
+								<i class="fas fa-times"></i>
+							</button>
+						</div>
+						{{/each}}
+					</div>
+					{{/if}}
+					<div class="craft-drop-hint">
+						<i class="fas fa-plus-circle"></i>
+						<span>Drop items here</span>
+					</div>
+				</div>
+			</div>
+
+			<div class="craft-arrow-col">
+				<i class="fas fa-arrow-right craft-arrow"></i>
+			</div>
+
+			<div class="craft-slot-column craft-output-column">
+				<span class="craft-slot-label">Output</span>
+				<div class="drop-slot craft-output-slot" data-slot-type="output">
+					{{#if recipe.output.uuid}}
+					<div class="craft-slot-item craft-output-slot-item">
+						<img class="craft-ing-img" src="{{recipe.output.img}}" alt="{{recipe.output.name}}">
+						<span class="craft-ing-name">{{recipe.output.name}}</span>
+						<input type="number" class="craft-qty-input" name="output_quantity" value="{{recipe.output.quantity}}" min="1">
+						<button type="button" class="craft-remove-btn" data-action="remove-output">
+							<i class="fas fa-times"></i>
+						</button>
+					</div>
+					{{else}}
+					<div class="craft-drop-hint">
+						<i class="fas fa-plus-circle"></i>
+						<span>Drop output here</span>
+					</div>
+					{{/if}}
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<footer class="sheet-footer">
+		<button type="button" data-action="save">
+			<i class="fas fa-save"></i> Save Recipe
+		</button>
+	</footer>
+</div>

@@ -6,6 +6,7 @@
 import { MODULE_ID, FLAGS, SETTINGS } from './constants.js';
 import { get_flag, set_flag, log, debug } from './utils.js';
 import { CraftHandler } from './craft-handler.js';
+import { PerkTreeHandler } from './perk-tree-handler.js';
 
 export class SocketHandler 
 {
@@ -34,7 +35,7 @@ export class SocketHandler
 		( game as any ).socket.on( socket_name, ( data: any ) => 
 		{
 			const user = ( game as any ).user;
-			debug( `socket message received by ${ user.name }`, data );
+			console.log( `yugen-downtime | socket message received by ${ user.name } | isGM: ${ user.isGM } | action: ${ data?.action }`, data );
 
 			if ( !user.isGM ) 
 			{
@@ -58,6 +59,15 @@ export class SocketHandler
 					console.error( `${ MODULE_ID } | craft execution failed:`, err );
 				} );
 			}
+
+			/** handle unlock-perk on gm client **/
+			if ( data.action === 'unlock-perk' )
+			{
+				PerkTreeHandler.handle_unlock( data ).catch( ( err ) =>
+				{
+					console.error( `${ MODULE_ID } | perk unlock execution failed:`, err );
+				} );
+			}
 		} );
 
 		this._registered = true;
@@ -75,13 +85,15 @@ export class SocketHandler
 			recipe_id
 		};
 
+		console.log( `yugen-downtime | emit_craft triggered | actor_id: ${ actor_id } | recipe_id: ${ recipe_id } | isGM: ${ ( game as any ).user.isGM }` );
+
 		if ( ( game as any ).user.isGM )
 		{
 			await CraftHandler.handle_craft( data );
 		}
 		else
 		{
-			log( 'user is not gm, sending craft request via socket' );
+			console.log( 'yugen-downtime | sending craft request to GM via socket' );
 			/** lowercase purpose of the api call **/
 			( game as any ).socket.emit( `module.${ MODULE_ID }`, data );
 		}
@@ -100,13 +112,15 @@ export class SocketHandler
 			roll_result
 		};
 
+		console.log( `yugen-downtime | emit_buy_action triggered | actor_id: ${ actor_id } | action_id: ${ action_id } | isGM: ${ ( game as any ).user.isGM } | roll_result:`, roll_result );
+
 		if ( ( game as any ).user.isGM ) 
 		{
 			await SocketHandler.handle_buy_action( data );
 		}
 		else 
 		{
-			log( 'user is not gm, sending socket request to gm' );
+			console.log( 'yugen-downtime | sending buy-action request to GM via socket' );
 			/** lowercase purpose of the api call **/
 			( game as any ).socket.emit( `module.${ MODULE_ID }`, data );
 		}
@@ -117,14 +131,14 @@ export class SocketHandler
 	 **/
 	private static async handle_buy_action( data: any ): Promise<void> 
 	{
-		log( 'processing downtime action purchase request', data );
+		console.log( 'yugen-downtime | SocketHandler.handle_buy_action processing purchase request | data:', data );
 
 		/** verify downtime mode is enabled **/
 		/** lowercase purpose of the api call **/
 		const is_downtime_active = ( game as any ).settings.get( MODULE_ID, SETTINGS.DOWNTIME_MODE );
 		if ( !is_downtime_active ) 
 		{
-			log( 'purchase rejected: downtime mode is inactive' );
+			console.warn( 'yugen-downtime | purchase rejected: downtime mode is inactive' );
 			return;
 		}
 
@@ -132,7 +146,7 @@ export class SocketHandler
 		const actor = ( game as any ).actors.get( data.actor_id );
 		if ( !actor ) 
 		{
-			console.error( `${ MODULE_ID } | purchase error: actor not found`, data.actor_id );
+			console.error( `yugen-downtime | purchase error: actor not found | actor_id: ${ data.actor_id }` );
 			return;
 		}
 
@@ -145,7 +159,7 @@ export class SocketHandler
 
 		if ( !selected_action ) 
 		{
-			console.error( `${ MODULE_ID } | purchase error: action not found`, data.action_id );
+			console.error( `yugen-downtime | purchase error: action not found | action_id: ${ data.action_id }` );
 			return;
 		}
 
@@ -153,7 +167,7 @@ export class SocketHandler
 		const current_points = get_flag( actor, FLAGS.POINTS ) ?? 0;
 		if ( current_points < selected_action.cost ) 
 		{
-			log( `purchase rejected: ${ actor.name } has ${ current_points } points, cost is ${ selected_action.cost }` );
+			console.warn( `yugen-downtime | purchase rejected: ${ actor.name } has ${ current_points } points, cost is ${ selected_action.cost }` );
 			return;
 		}
 
@@ -164,12 +178,14 @@ export class SocketHandler
 			roll_success = data.roll_result.success;
 		}
 
+		console.log( `yugen-downtime | purchase approved | roll_success: ${ roll_success } | current_points: ${ current_points } | cost: ${ selected_action.cost }` );
+
 		/** deduct points **/
 		const next_points = current_points - selected_action.cost;
 		/** lowercase purpose of the api call **/
 		await set_flag( actor, FLAGS.POINTS, next_points );
 
-		log( `deducted ${ selected_action.cost } points from ${ actor.name }` );
+		console.log( `yugen-downtime | successfully deducted ${ selected_action.cost } points from ${ actor.name } (remaining: ${ next_points })` );
 
 		/** execute macro (only on success) **/
 		if ( roll_success && ( selected_action.macro_id || selected_action.macro_name ) ) 
@@ -180,7 +196,7 @@ export class SocketHandler
 
 			if ( macro ) 
 			{
-				log( `executing macro: ${ macro.name }` );
+				console.log( `yugen-downtime | executing macro on GM client: ${ macro.name }` );
 				try 
 				{
 					/** execute macro with actor context **/
@@ -188,12 +204,46 @@ export class SocketHandler
 				}
 				catch ( err ) 
 				{
-					console.error( `${ MODULE_ID } | macro execution failed:`, err );
+					console.error( `yugen-downtime | macro execution failed:`, err );
 				}
 			}
 			else 
 			{
-				console.warn( `${ MODULE_ID } | macro not found: id=${ selected_action.macro_id }, name=${ selected_action.macro_name }` );
+				console.warn( `yugen-downtime | macro not found: id=${ selected_action.macro_id }, name=${ selected_action.macro_name }` );
+			}
+		}
+
+		/** apply active effect (only on success) **/
+		if ( roll_success && selected_action.effect ) 
+		{
+			log( `applying action active effect to ${ actor.name }` );
+			try 
+			{
+				const effect_data: any = 
+				{
+					name: selected_action.effect.name,
+					label: selected_action.effect.name,
+					img: selected_action.effect.img || 'icons/svg/aura.svg',
+					icon: selected_action.effect.img || 'icons/svg/aura.svg',
+					origin: `yugen-downtime`,
+					description: selected_action.effect.description,
+					disabled: false,
+					changes: selected_action.effect.changes.map( ( c: any ) => 
+					{
+						return {
+							key: c.key,
+							mode: Number( c.mode ),
+							value: c.value,
+							priority: 20
+						};
+					} )
+				};
+				/** create active effect document on actor **/
+				await actor.createEmbeddedDocuments( 'ActiveEffect', [ effect_data ] );
+			}
+			catch ( err ) 
+			{
+				console.error( `${ MODULE_ID } | applying custom active effect failed:`, err );
 			}
 		}
 
@@ -258,5 +308,30 @@ export class SocketHandler
 		}
 		/** lowercase purpose of the api call **/
 		await ( game as any ).settings.set( MODULE_ID, SETTINGS.LOGS, current_logs );
+	}
+
+	/**
+	 * emits a perk unlock request to the gm, or runs it directly if the user is a gm.
+	 **/
+	public static async emit_unlock_perk( actor_id: string, tree_id: string, node_id: string ): Promise<void>
+	{
+		const data =
+		{
+			action: 'unlock-perk',
+			actor_id,
+			tree_id,
+			node_id
+		};
+
+		if ( ( game as any ).user.isGM )
+		{
+			await PerkTreeHandler.handle_unlock( data );
+		}
+		else
+		{
+			log( 'user is not gm, sending perk unlock request via socket' );
+			/** lowercase purpose of the api call **/
+			( game as any ).socket.emit( `module.${ MODULE_ID }`, data );
+		}
 	}
 }

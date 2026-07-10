@@ -10,14 +10,63 @@ import type { CraftRecipe, CraftIngredient } from './craft-handler.js';
 import { DowntimeLogsApp } from './downtime-logs-app.js';
 import { ActionEditor } from './action-editor.js';
 import { RecipeEditor } from './recipe-editor.js';
+import { PerkTreeEditor } from './perk-tree-editor.js';
+import { DowntimeActorEditor } from './actor-editor.js';
 
 const { ApplicationV2, HandlebarsApplicationMixin } = ( foundry.applications.api as any );
+
+function calculate_tiers( nodes: any[] ): any[] 
+{
+	const node_map = new Map( nodes.map( ( n ) => 
+	{
+		return [ n.id, { ...n, tier: 1 } ];
+	} ) );
+	let changed = true;
+	let iterations = 0;
+	while ( changed && iterations < 100 ) 
+	{
+		changed = false;
+		iterations++;
+		for ( const node of node_map.values( ) ) 
+		{
+			let max_req_tier = 0;
+			for ( const req_id of node.requirements ) 
+			{
+				const req_node = node_map.get( req_id );
+				if ( req_node && req_node.tier > max_req_tier ) 
+				{
+					max_req_tier = req_node.tier;
+				}
+			}
+			if ( max_req_tier > 0 && node.tier !== max_req_tier + 1 ) 
+			{
+				node.tier = max_req_tier + 1;
+				changed = true;
+			}
+		}
+	}
+	return Array.from( node_map.values( ) );
+}
 
 export class DowntimeApp extends ( HandlebarsApplicationMixin( ApplicationV2 ) as any )
 {
 	private static _instance: DowntimeApp | null = null;
 	private _sub_tab: string = 'actions-config';
 	private _only_show_on_map: boolean = false;
+	private _active_tree_id: string = '';
+	private _actor_search_query: string = '';
+	private _actor_search_focused: boolean = false;
+	private _target_actor: any = null;
+
+	public get target_actor( ): any
+	{
+		return this._target_actor;
+	}
+
+	public set target_actor( actor: any )
+	{
+		this._target_actor = actor;
+	}
 
 	constructor( options: any = { } )
 	{
@@ -26,7 +75,7 @@ export class DowntimeApp extends ( HandlebarsApplicationMixin( ApplicationV2 ) a
 		/** listen for actor flag updates to refresh player point views **/
 		Hooks.on( 'updateActor', ( actor: any ) =>
 		{
-			const player_actor = ( game as any ).user.character || ( canvas as any ).tokens?.controlled[ 0 ]?.actor;
+			const player_actor = this.target_actor || ( canvas as any ).tokens?.controlled[ 0 ]?.actor;
 			if ( player_actor && actor.id === player_actor.id )
 			{
 				if ( this.state === ( ApplicationV2 as any ).RENDER_STATES.RENDERED )
@@ -64,7 +113,7 @@ export class DowntimeApp extends ( HandlebarsApplicationMixin( ApplicationV2 ) a
 			return;
 		}
 
-		const player_actor = ( game as any ).user.character || ( canvas as any ).tokens?.controlled[ 0 ]?.actor;
+		const player_actor = this.target_actor || ( canvas as any ).tokens?.controlled[ 0 ]?.actor;
 		if ( player_actor && parent.id === player_actor.id )
 		{
 			if ( this.state === ( ApplicationV2 as any ).RENDER_STATES.RENDERED )
@@ -133,6 +182,11 @@ export class DowntimeApp extends ( HandlebarsApplicationMixin( ApplicationV2 ) a
 					icon: 'fas fa-hammer'
 				},
 				{
+					id: 'perks',
+					label: 'Perks',
+					icon: 'fas fa-project-diagram'
+				},
+				{
 					id: 'manage',
 					label: 'Manage',
 					icon: 'fas fa-cog',
@@ -165,7 +219,17 @@ export class DowntimeApp extends ( HandlebarsApplicationMixin( ApplicationV2 ) a
 		'sub-tab': DowntimeApp._on_sub_tab,
 		'edit-action': DowntimeApp._on_edit_action,
 		'edit-recipe': DowntimeApp._on_edit_recipe,
-		'toggle-map-filter': DowntimeApp._on_toggle_map_filter
+		'edit-actor': DowntimeApp._on_edit_actor,
+		'toggle-map-filter': DowntimeApp._on_toggle_map_filter,
+		'assign-tree': DowntimeApp._on_assign_tree,
+		'unassign-tree': DowntimeApp._on_unassign_tree,
+		'add-tree': DowntimeApp._on_add_tree,
+		'edit-tree': DowntimeApp._on_edit_tree,
+		'delete-tree': DowntimeApp._on_delete_tree,
+		'select-player-tree': DowntimeApp._on_select_player_tree,
+		'unlock-node': DowntimeApp._on_unlock_node,
+		'refund-node': DowntimeApp._on_refund_node,
+		'revoke-node': DowntimeApp._on_revoke_node
 	};
 
 	/**
@@ -185,8 +249,11 @@ export class DowntimeApp extends ( HandlebarsApplicationMixin( ApplicationV2 ) a
 		/** lowercase purpose of the api call **/
 		const raw_recipes: CraftRecipe[] = ( game as any ).settings.get( MODULE_ID, SETTINGS.RECIPES ) || [];
 
+		/** lowercase purpose of the api call **/
+		const global_trees = ( game as any ).settings.get( MODULE_ID, SETTINGS.PERK_TREES ) || [];
+
 		/** resolve active player actor **/
-		const player_actor = ( game as any ).user.character || ( canvas as any ).tokens?.controlled[ 0 ]?.actor;
+		const player_actor = this.target_actor || ( canvas as any ).tokens?.controlled[ 0 ]?.actor;
 		const player_points = player_actor ? ( get_flag( player_actor, FLAGS.POINTS ) ?? 0 ) : 0;
 
 		/** filter player view of actions **/
@@ -206,6 +273,87 @@ export class DowntimeApp extends ( HandlebarsApplicationMixin( ApplicationV2 ) a
 				name: m.name
 			};
 		} ) : [];
+
+		/** prepare perk trees for player **/
+		const progress = player_actor ? ( get_flag( player_actor, FLAGS.PERK_TREES ) || {} ) : {};
+		const player_assigned_trees = global_trees.filter( ( t: any ) => 
+		{
+			return progress[ t.id ] !== undefined;
+		} ).map( ( t: any ) => 
+		{
+			const tree_prog = progress[ t.id ] || { unlocked_nodes: [] };
+
+			/** annotate nodes with player status **/
+			const annotated_nodes = t.nodes.map( ( n: any ) => 
+			{
+				const is_unlocked = tree_prog.unlocked_nodes.includes( n.id );
+
+				/** check requirements **/
+				const missing_reqs = n.requirements.filter( ( req_id: string ) => 
+				{
+					return !tree_prog.unlocked_nodes.includes( req_id );
+				} );
+
+				const is_available = !is_unlocked && missing_reqs.length === 0;
+				const is_locked = !is_unlocked && missing_reqs.length > 0;
+				const can_afford = is_available && player_points >= n.cost;
+
+				/** format requirement names **/
+				const req_names = n.requirements.map( ( req_id: string ) => 
+				{
+					const req_node = t.nodes.find( ( o: any ) => o.id === req_id );
+					return req_node ? req_node.name : 'Unknown';
+				} );
+
+				return {
+					...n,
+					is_unlocked,
+					is_locked,
+					is_available,
+					can_afford,
+					req_list: req_names.join( ', ' )
+				};
+			} );
+
+			/** calculate tiers **/
+			const nodes_with_tiers = calculate_tiers( annotated_nodes );
+
+			/** group by tier **/
+			const tiers_map = new Map( );
+			nodes_with_tiers.forEach( ( n: any ) => 
+			{
+				if ( !tiers_map.has( n.tier ) ) 
+				{
+					tiers_map.set( n.tier, [] );
+				}
+				tiers_map.get( n.tier ).push( n );
+			} );
+
+			const tiers = Array.from( tiers_map.entries( ) ).map( ( [ tier_num, tier_nodes ] ) => 
+			{
+				return {
+					tier_number: tier_num,
+					nodes: tier_nodes
+				};
+			} ).sort( ( a, b ) => a.tier_number - b.tier_number );
+
+			return {
+				id: t.id,
+				name: t.name,
+				nodes: annotated_nodes,
+				tiers
+			};
+		} );
+
+		if ( !this._active_tree_id && player_assigned_trees.length > 0 )
+		{
+			this._active_tree_id = player_assigned_trees[ 0 ].id;
+		}
+
+		const active_player_tree = player_assigned_trees.find( ( t: any ) => 
+		{
+			return t.id === this._active_tree_id;
+		} ) || player_assigned_trees[ 0 ] || null;
 
 		/** gather player character actors list for points config **/
 		let character_actors: any[] = [];
@@ -265,15 +413,49 @@ export class DowntimeApp extends ( HandlebarsApplicationMixin( ApplicationV2 ) a
 
 			character_actors = Array.from( actors_map.values( ) ).map( ( a: any ) =>
 			{
+				const act_progress = get_flag( a, FLAGS.PERK_TREES ) || {};
+				const assigned_tree_list = global_trees.filter( ( t: any ) => 
+				{
+					return act_progress[ t.id ] !== undefined;
+				} ).map( ( t: any ) => 
+				{
+					return {
+						id: t.id,
+						name: t.name
+					};
+				} );
+
+				const unassigned_tree_list = global_trees.filter( ( t: any ) => 
+				{
+					return act_progress[ t.id ] === undefined;
+				} ).map( ( t: any ) => 
+				{
+					return {
+						id: t.id,
+						name: t.name
+					};
+				} );
+
 				return {
 					id: a.id,
 					name: a.name,
 					img: a.img || 'icons/svg/mystery-man.svg',
 					points: get_flag( a, FLAGS.POINTS ) ?? 0,
 					rest_short: get_flag( a, FLAGS.REST_SHORT_POINTS ) ?? global_short,
-					rest_long: get_flag( a, FLAGS.REST_LONG_POINTS ) ?? global_long
+					rest_long: get_flag( a, FLAGS.REST_LONG_POINTS ) ?? global_long,
+					assigned_trees: assigned_tree_list,
+					unassigned_trees: unassigned_tree_list
 				};
 			} );
+
+			if ( this._actor_search_query )
+			{
+				const query = this._actor_search_query.toLowerCase( );
+				character_actors = character_actors.filter( ( a: any ) => 
+				{
+					return a.name.toLowerCase( ).includes( query );
+				} );
+			}
 		}
 
 		/** gather and format downtime logs **/
@@ -388,6 +570,7 @@ export class DowntimeApp extends ( HandlebarsApplicationMixin( ApplicationV2 ) a
 			craft_enabled,
 			sub_tab: this._sub_tab,
 			only_show_on_map: this._only_show_on_map,
+			actor_search_query: this._actor_search_query,
 			player:
 			{
 				has_actor: !!player_actor,
@@ -404,6 +587,9 @@ export class DowntimeApp extends ( HandlebarsApplicationMixin( ApplicationV2 ) a
 			craft_logs,
 			player_craft_logs,
 			roll_choices,
+			perk_trees: global_trees,
+			player_trees: player_assigned_trees,
+			active_tree: active_player_tree,
 			tabs: this._get_tabs_context( 'downtime', tabs_config )
 		};
 	}
@@ -481,6 +667,34 @@ export class DowntimeApp extends ( HandlebarsApplicationMixin( ApplicationV2 ) a
 				this._on_drop( event, slot );
 			}
 		} );
+
+		/** search input event listener **/
+		this.element.addEventListener( 'input', ( event: any ) =>
+		{
+			const target = event.target.closest( '.actor-search-input' );
+			if ( target )
+			{
+				this._actor_search_query = target.value;
+				this._actor_search_focused = true;
+				this.render( );
+			}
+		} );
+	}
+
+	protected async _onRender( context: any, options: any )
+	{
+		await super._onRender( context, options );
+		if ( this._actor_search_focused )
+		{
+			const search_input = this.element.querySelector( '#yugen-downtime-actor-search' ) as HTMLInputElement;
+			if ( search_input )
+			{
+				search_input.focus( );
+				const len = search_input.value.length;
+				search_input.setSelectionRange( len, len );
+			}
+			this._actor_search_focused = false;
+		}
 	}
 
 	/**
@@ -613,6 +827,18 @@ export class DowntimeApp extends ( HandlebarsApplicationMixin( ApplicationV2 ) a
 	private static async _on_buy( this: DowntimeApp, event: any, target: HTMLButtonElement )
 	{
 		event.preventDefault( );
+
+		if ( !( game as any ).user.isGM )
+		{
+			const has_active_gm: boolean = ( game as any ).users.some( ( u: any ) => u.isGM && u.active );
+			if ( !has_active_gm )
+			{
+				/** lowercase purpose of the api call **/
+				( ui as any ).notifications.warn( ( game as any ).i18n.localize( 'yugen-downtime.notifications.no-gm-online' ) );
+				return;
+			}
+		}
+
 		const action_id = target.dataset.actionId || '';
 		const actor_id = target.dataset.actorId || '';
 
@@ -695,7 +921,8 @@ export class DowntimeApp extends ( HandlebarsApplicationMixin( ApplicationV2 ) a
 			}
 
 			/** ensure the roll is evaluated **/
-			if ( typeof actual_roll.evaluateSync === 'function' && !actual_roll.evaluated )
+			const is_evaluated = actual_roll.evaluated || actual_roll._evaluated || typeof actual_roll.total === 'number';
+			if ( !is_evaluated && typeof actual_roll.evaluateSync === 'function' )
 			{
 				try
 				{
@@ -877,11 +1104,26 @@ export class DowntimeApp extends ( HandlebarsApplicationMixin( ApplicationV2 ) a
 	private static async _on_craft( this: DowntimeApp, event: any, target: HTMLButtonElement )
 	{
 		event.preventDefault( );
+
+		if ( !( game as any ).user.isGM )
+		{
+			const has_active_gm: boolean = ( game as any ).users.some( ( u: any ) => u.isGM && u.active );
+			if ( !has_active_gm )
+			{
+				/** lowercase purpose of the api call **/
+				( ui as any ).notifications.warn( ( game as any ).i18n.localize( 'yugen-downtime.notifications.no-gm-online' ) );
+				return;
+			}
+		}
+
 		const recipe_id = target.dataset.recipeId || '';
 		const actor_id = target.dataset.actorId || '';
 
+		console.log( `yugen-downtime | _on_craft click | recipe_id: ${ recipe_id } | actor_id: ${ actor_id }` );
+
 		if ( !recipe_id || !actor_id )
 		{
+			console.error( 'yugen-downtime | craft error: missing recipe_id or actor_id dataset attributes on button' );
 			return;
 		}
 
@@ -1060,12 +1302,384 @@ export class DowntimeApp extends ( HandlebarsApplicationMixin( ApplicationV2 ) a
 	}
 
 	/**
+	 * GM opens the character configuration editor popup.
+	 **/
+	private static async _on_edit_actor( this: DowntimeApp, event: any, target: HTMLElement )
+	{
+		event.preventDefault( );
+		const actor_id = target.dataset.actorId || '';
+		if ( !actor_id )
+		{
+			return;
+		}
+
+		new DowntimeActorEditor( actor_id ).render( { force: true } );
+	}
+
+	/**
 	 * GM toggles filtering characters by active tokens on the current scene.
 	 **/
 	private static async _on_toggle_map_filter( this: DowntimeApp, event: any, target: HTMLElement )
 	{
 		event.preventDefault( );
 		this._only_show_on_map = !this._only_show_on_map;
+		this.render( );
+	}
+
+	/**
+	 * GM assigns a perk tree to a player actor.
+	 **/
+	private static async _on_assign_tree( this: DowntimeApp, event: any, target: HTMLSelectElement )
+	{
+		const actor_id = target.dataset.actorId || '';
+		const tree_id = target.value;
+		if ( !actor_id || !tree_id )
+		{
+			return;
+		}
+
+		/** lowercase purpose of the api call **/
+		const actor = ( game as any ).actors.get( actor_id );
+		if ( !actor )
+		{
+			return;
+		}
+
+		const progress = get_flag( actor, FLAGS.PERK_TREES ) || { };
+		if ( progress[ tree_id ] === undefined )
+		{
+			progress[ tree_id ] = 
+			{
+				unlocked_nodes: [ ]
+			};
+			await set_flag( actor, FLAGS.PERK_TREES, progress );
+			log( `assigned perk tree ${ tree_id } to actor ${ actor.name }` );
+		}
+		this.render( );
+	}
+
+	/**
+	 * GM unassigns a perk tree from a player actor.
+	 **/
+	private static async _on_unassign_tree( this: DowntimeApp, event: any, target: HTMLButtonElement )
+	{
+		const actor_id = target.dataset.actorId || '';
+		const tree_id = target.dataset.treeId || '';
+		if ( !actor_id || !tree_id )
+		{
+			return;
+		}
+
+		/** lowercase purpose of the api call **/
+		const actor = ( game as any ).actors.get( actor_id );
+		if ( !actor )
+		{
+			return;
+		}
+
+		const progress = get_flag( actor, FLAGS.PERK_TREES ) || { };
+		if ( progress[ tree_id ] !== undefined )
+		{
+			delete progress[ tree_id ];
+			await set_flag( actor, FLAGS.PERK_TREES, progress );
+			log( `removed perk tree ${ tree_id } from actor ${ actor.name }` );
+		}
+		this.render( );
+	}
+
+	/**
+	 * GM adds a new perk tree config.
+	 **/
+	private static async _on_add_tree( this: DowntimeApp, event: any, _target: HTMLButtonElement )
+	{
+		event.preventDefault( );
+		const trees = ( game as any ).settings.get( MODULE_ID, SETTINGS.PERK_TREES ) || [ ];
+		const new_tree = 
+		{
+			id: ( foundry.utils as any ).randomID( ),
+			name: 'New Perk Tree',
+			nodes: [ ]
+		};
+		trees.push( new_tree );
+		await ( game as any ).settings.set( MODULE_ID, SETTINGS.PERK_TREES, trees );
+		this.render( );
+	}
+
+	/**
+	 * GM opens the perk tree config editor.
+	 **/
+	private static _on_edit_tree( this: DowntimeApp, event: any, target: HTMLButtonElement )
+	{
+		event.preventDefault( );
+		const tree_id = target.dataset.treeId || '';
+		new PerkTreeEditor( tree_id, { }, ( ) => 
+		{
+			this.render( );
+		} ).render( { force: true } );
+	}
+
+	/**
+	 * GM deletes a perk tree config.
+	 **/
+	private static async _on_delete_tree( this: DowntimeApp, event: any, target: HTMLButtonElement )
+	{
+		event.preventDefault( );
+		const tree_id = target.dataset.treeId || '';
+		let trees = ( game as any ).settings.get( MODULE_ID, SETTINGS.PERK_TREES ) || [ ];
+		trees = trees.filter( ( t: any ) => 
+		{
+			return t.id !== tree_id;
+		} );
+		await ( game as any ).settings.set( MODULE_ID, SETTINGS.PERK_TREES, trees );
+		this.render( );
+	}
+
+	/**
+	 * player switches the active perk tree tab view.
+	 **/
+	private static _on_select_player_tree( this: DowntimeApp, event: any, target: HTMLElement )
+	{
+		event.preventDefault( );
+		this._active_tree_id = target.dataset.treeId || '';
+		this.render( );
+	}
+
+	/**
+	 * player unlocks a perk node.
+	 **/
+	private static async _on_unlock_node( this: DowntimeApp, event: any, target: HTMLButtonElement )
+	{
+		event.preventDefault( );
+
+		if ( !( game as any ).user.isGM )
+		{
+			const has_active_gm: boolean = ( game as any ).users.some( ( u: any ) => u.isGM && u.active );
+			if ( !has_active_gm )
+			{
+				/** lowercase purpose of the api call **/
+				( ui as any ).notifications.warn( ( game as any ).i18n.localize( 'yugen-downtime.notifications.no-gm-online' ) );
+				return;
+			}
+		}
+
+		const actor_id = target.dataset.actorId || '';
+		const tree_id = target.dataset.treeId || '';
+		const node_id = target.dataset.nodeId || '';
+		if ( !actor_id || !tree_id || !node_id )
+		{
+			return;
+		}
+
+		await SocketHandler.emit_unlock_perk( actor_id, tree_id, node_id );
+	}
+
+	/**
+	 * gm refunds an unlocked perk node to an actor, returning their points.
+	 **/
+	private static async _on_refund_node( this: DowntimeApp, event: any, target: HTMLButtonElement )
+	{
+		event.preventDefault( );
+
+		/** check gm user permissions **/
+		if ( !( game as any ).user.isGM )
+		{
+			return;
+		}
+
+		const actor_id = target.dataset.actorId || '';
+		const tree_id = target.dataset.treeId || '';
+		const node_id = target.dataset.nodeId || '';
+		if ( !actor_id || !tree_id || !node_id )
+		{
+			return;
+		}
+
+		/** retrieve actor from world collection **/
+		const actor = ( game as any ).actors.get( actor_id );
+		if ( !actor )
+		{
+			return;
+		}
+
+		/** verify user has owner permission on the actor **/
+		if ( !actor.testUserPermission( ( game as any ).user, 'OWNER' ) )
+		{
+			return;
+		}
+
+		/** retrieve global perk trees setting **/
+		const global_trees = ( game as any ).settings.get( MODULE_ID, SETTINGS.PERK_TREES ) || [ ];
+		const tree = global_trees.find( ( t: any ) => 
+		{
+			return t.id === tree_id;
+		} );
+		const node = tree?.nodes.find( ( n: any ) => 
+		{
+			return n.id === node_id;
+		} );
+
+		if ( !node )
+		{
+			return;
+		}
+
+		/** get actor perk trees progress flag **/
+		const progress = get_flag( actor, FLAGS.PERK_TREES ) || { };
+		const tree_prog = progress[ tree_id ];
+		if ( !tree_prog || !tree_prog.unlocked_nodes.includes( node_id ) )
+		{
+			return;
+		}
+
+		/** remove node from unlocked list **/
+		tree_prog.unlocked_nodes = tree_prog.unlocked_nodes.filter( ( id: string ) => 
+		{
+			return id !== node_id;
+		} );
+		/** set actor perk trees progress flag **/
+		await set_flag( actor, FLAGS.PERK_TREES, progress );
+
+		/** get actor point flags **/
+		const current_points = get_flag( actor, FLAGS.POINTS ) ?? 0;
+		const refunded_points = current_points + node.cost;
+		/** set actor points flag **/
+		await set_flag( actor, FLAGS.POINTS, refunded_points );
+
+		log( `gm refunded perk ${ node.name } for actor ${ actor.name }, returning ${ node.cost } points` );
+
+		/** remove associated active effect **/
+		if ( node.effect )
+		{
+			const effect_name = node.effect.name;
+			/** search active effects on the actor **/
+			const effect = actor.effects.find( ( e: any ) => 
+			{
+				const is_node_match = e.getFlag( MODULE_ID, 'node_id' ) === node_id;
+				const is_legacy_match = ( e.origin === 'yugen-downtime' || e.getFlag( 'core', 'source' ) === 'yugen-downtime' ) && 
+				                        ( e.name === effect_name || e.label === effect_name );
+				return is_node_match || is_legacy_match;
+			} );
+			if ( effect )
+			{
+				/** delete active effect from the actor **/
+				await effect.delete( );
+			}
+		}
+
+		/** send chat notification **/
+		const chat_content = `<div class="downtime-chat-card perk-chat-card">
+	<p>GM <strong>yugen.</strong> refunded <strong>${ ( globalThis as any ).yugen_utils.escape_html( actor.name ) }</strong> for perk node <strong>${ ( globalThis as any ).yugen_utils.escape_html( node.name ) }</strong>, returning <strong>${ node.cost }</strong> points.</p>
+</div>`;
+
+		/** create chat message document **/
+		await ( ChatMessage as any ).create( 
+		{
+			user: ( game as any ).user.id,
+			content: chat_content
+		} );
+
+		this.render( );
+	}
+
+	/**
+	 * gm revokes an unlocked perk node from an actor, locking it without returning points.
+	 **/
+	private static async _on_revoke_node( this: DowntimeApp, event: any, target: HTMLButtonElement )
+	{
+		event.preventDefault( );
+
+		/** check gm user permissions **/
+		if ( !( game as any ).user.isGM )
+		{
+			return;
+		}
+
+		const actor_id = target.dataset.actorId || '';
+		const tree_id = target.dataset.treeId || '';
+		const node_id = target.dataset.nodeId || '';
+		if ( !actor_id || !tree_id || !node_id )
+		{
+			return;
+		}
+
+		/** retrieve actor from world collection **/
+		const actor = ( game as any ).actors.get( actor_id );
+		if ( !actor )
+		{
+			return;
+		}
+
+		/** verify user has owner permission on the actor **/
+		if ( !actor.testUserPermission( ( game as any ).user, 'OWNER' ) )
+		{
+			return;
+		}
+
+		/** retrieve global perk trees setting **/
+		const global_trees = ( game as any ).settings.get( MODULE_ID, SETTINGS.PERK_TREES ) || [ ];
+		const tree = global_trees.find( ( t: any ) => 
+		{
+			return t.id === tree_id;
+		} );
+		const node = tree?.nodes.find( ( n: any ) => 
+		{
+			return n.id === node_id;
+		} );
+
+		if ( !node )
+		{
+			return;
+		}
+
+		/** get actor perk trees progress flag **/
+		const progress = get_flag( actor, FLAGS.PERK_TREES ) || { };
+		const tree_prog = progress[ tree_id ];
+		if ( !tree_prog || !tree_prog.unlocked_nodes.includes( node_id ) )
+		{
+			return;
+		}
+
+		/** remove node from unlocked list **/
+		tree_prog.unlocked_nodes = tree_prog.unlocked_nodes.filter( ( id: string ) => 
+		{
+			return id !== node_id;
+		} );
+		/** set actor perk trees progress flag **/
+		await set_flag( actor, FLAGS.PERK_TREES, progress );
+
+		log( `gm revoked perk ${ node.name } from actor ${ actor.name }` );
+
+		/** remove associated active effect **/
+		if ( node.effect )
+		{
+			const effect_name = node.effect.name;
+			/** search active effects on the actor **/
+			const effect = actor.effects.find( ( e: any ) => 
+			{
+				const is_node_match = e.getFlag( MODULE_ID, 'node_id' ) === node_id;
+				const is_legacy_match = ( e.origin === 'yugen-downtime' || e.getFlag( 'core', 'source' ) === 'yugen-downtime' ) && 
+				                        ( e.name === effect_name || e.label === effect_name );
+				return is_node_match || is_legacy_match;
+			} );
+			if ( effect )
+			{
+				/** delete active effect from the actor **/
+				await effect.delete( );
+			}
+		}
+
+		/** send chat notification **/
+		const chat_content = `<div class="downtime-chat-card perk-chat-card">
+	<p>GM <strong>yugen.</strong> revoked perk node <strong>${ ( globalThis as any ).yugen_utils.escape_html( node.name ) }</strong> from <strong>${ ( globalThis as any ).yugen_utils.escape_html( actor.name ) }</strong>.</p>
+</div>`;
+
+		/** create chat message document **/
+		await ( ChatMessage as any ).create( 
+		{
+			user: ( game as any ).user.id,
+			content: chat_content
+		} );
+
 		this.render( );
 	}
 }

@@ -1,0 +1,84 @@
+<div class="perk-node-editor-container">
+	<div class="editor-content">
+		<div class="form-group">
+			<label>Perk Name</label>
+			<div class="form-fields">
+				<input type="text" name="name" value="{{node.name}}" placeholder="Perk Name" required>
+			</div>
+		</div>
+
+		<div class="form-group">
+			<label>Downtime Point Cost</label>
+			<div class="form-fields">
+				<input type="number" name="cost" value="{{node.cost}}" min="0" step="1">
+			</div>
+		</div>
+
+		<div class="form-group">
+			<label>Perk Icon</label>
+			<div class="form-fields">
+				<input type="text" name="icon" value="{{node.icon}}" placeholder="icons/svg/book.svg">
+				<button type="button" class="file-picker-btn" data-action="pick-icon" title="Choose Icon">
+					<i class="fas fa-file-import"></i>
+				</button>
+			</div>
+		</div>
+
+		<div class="form-group stacked">
+			<label>Description</label>
+			<div class="form-fields">
+				<textarea name="description" placeholder="A brief explanation of the perk benefits...">{{node.description}}</textarea>
+			</div>
+		</div>
+
+		{{#if other_nodes.length}}
+		<div class="form-group stacked">
+			<label>Prerequisites (Requires)</label>
+			<div class="requirements-checkbox-list">
+				{{#each other_nodes}}
+				<label class="checkbox-label">
+					<input type="checkbox" name="requirements" value="{{this.id}}" {{#if this.selected}}checked{{/if}}>
+					<span>{{this.name}}</span>
+				</label>
+				{{/each}}
+			</div>
+		</div>
+		{{/if}}
+
+		<div class="form-group">
+			<label>Trigger Macro</label>
+			<div class="form-fields">
+				<select name="macro_id">
+					{{selectOptions macros selected=node.macro_id nameAttr="id" labelAttr="name" blank="None"}}
+				</select>
+			</div>
+		</div>
+
+		<div class="form-group">
+			<label>Active Effect Reward</label>
+			<div class="form-fields">
+				{{#if node.effect}}
+				<span style="font-size: 0.8rem; color: #10b981; font-weight: 700; display: inline-flex; align-items: center; gap: 4px; padding-right: 8px;">
+					<i class="fas fa-check-circle"></i> Configured ({{node.effect.name}})
+				</span>
+				<button type="button" class="effect-control-btn" data-action="edit-effect" title="Edit Active Effect">
+					<i class="fas fa-edit"></i> Edit
+				</button>
+				<button type="button" class="effect-control-btn" data-action="remove-effect" title="Remove Active Effect" style="color: #f87171 !important;">
+					<i class="fas fa-trash-alt"></i> Remove
+				</button>
+				{{else}}
+				<button type="button" class="effect-control-btn" data-action="create-effect" style="flex: 1 !important; width: auto !important;">
+					<i class="fas fa-plus"></i> Configure Active Effect
+				</button>
+				{{/if}}
+			</div>
+		</div>
+	</div>
+
+	<footer class="sheet-footer">
+		<button type="button" data-action="save">
+			<i class="fas fa-save"></i> Save Perk
+		</button>
+	</footer>
+</div>

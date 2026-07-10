@@ -1,0 +1,254 @@
+<div class="downtime-app-container">
+	<header class="downtime-header">
+		<div class="downtime-branding">
+			<h1 class="branding-title">yugen-downtime | craft</h1>
+		</div>
+		<nav class="sheet-tabs tabs" data-group="craft">
+			{{#each tabs}}
+			<a class="item {{this.cssClass}}" data-action="tab" data-group="{{this.group}}" data-tab="{{this.id}}">
+				<i class="{{this.icon}}"></i> {{this.label}}
+			</a>
+			{{/each}}
+		</nav>
+	</header>
+
+	<section class="sheet-body">
+		{{#if tabs.browse.active}}
+		<div class="tab actions-tab craft-browse-tab">
+			{{#if player.has_actor}}
+			<div class="player-hero">
+				<div class="hero-left">
+					<span class="hero-subtitle">crafting system</span>
+					<h2 class="hero-title">{{player.name}}</h2>
+				</div>
+				<div class="hero-points-card">
+					<span class="points-val">{{player.points}}</span>
+					<span class="points-lbl">Points</span>
+				</div>
+			</div>
+
+			{{#if craft_enabled}}
+			{{#if recipes.length}}
+			<div class="craft-recipes-grid">
+				{{#each recipes}}
+				<div class="craft-recipe-card {{#unless this.can_craft}}disabled{{/unless}}">
+					<div class="card-header-row">
+						<h3 class="card-title">{{this.name}}</h3>
+						<span class="card-cost">{{this.dt_cost}} {{#if (eq this.dt_cost 1)}}point{{else}}points{{/if}}</span>
+					</div>
+
+					{{#if this.description}}
+					<p class="card-desc">{{this.description}}</p>
+					{{/if}}
+
+					<div class="craft-card-body">
+						<div class="craft-ingredients-section">
+							<span class="craft-section-label">Requires</span>
+							<div class="craft-ingredients-list">
+								{{#each this.ingredients}}
+								<div class="craft-ingredient-row {{#unless this.has_enough}}missing{{/unless}}">
+									<img class="craft-ing-img" src="{{this.img}}" alt="{{this.name}}">
+									<span class="craft-ing-name">{{this.name}}</span>
+									<span class="craft-ing-qty">{{this.available}}/{{this.quantity}}</span>
+								</div>
+								{{else}}
+								<span class="craft-no-ingredients">No ingredients required.</span>
+								{{/each}}
+							</div>
+						</div>
+
+						<div class="craft-arrow-col">
+							<i class="fas fa-arrow-right craft-arrow"></i>
+						</div>
+
+						<div class="craft-output-section">
+							<span class="craft-section-label">Produces</span>
+							<div class="craft-output-display">
+								<img class="craft-output-img" src="{{this.output.img}}" alt="{{this.output.name}}">
+								<span class="craft-output-name">{{this.output.name}}</span>
+								<span class="craft-output-qty">x{{this.output.quantity}}</span>
+							</div>
+						</div>
+					</div>
+
+					<button class="action-btn buy-btn craft-btn"
+						data-action="craft"
+						data-recipe-id="{{this.id}}"
+						data-actor-id="{{../player.id}}"
+						{{#unless this.can_craft}}disabled{{/unless}}>
+						<i class="fas fa-hammer"></i> Craft
+					</button>
+				</div>
+				{{/each}}
+			</div>
+			{{else}}
+			<div class="empty-banner warning">
+				<i class="fas fa-scroll"></i>
+				<div class="banner-text">
+					<h4>No Recipes Available</h4>
+					<p>The Gamemaster has not yet configured any crafting recipes.</p>
+				</div>
+			</div>
+			{{/if}}
+
+			{{else}}
+			<div class="empty-banner warning">
+				<i class="fas fa-hammer"></i>
+				<div class="banner-text">
+					<h4>Crafting is Inactive</h4>
+					<p>Wait for the Gamemaster to enable the crafting system.</p>
+				</div>
+			</div>
+			{{/if}}
+
+			<div class="history-section">
+				<div class="section-title-row">
+					<h3 class="section-heading">My Crafting History</h3>
+				</div>
+				<div class="logs-feed">
+					{{#each player_craft_logs}}
+					<div class="feed-item">
+						<span class="item-time">{{this.formatted_time}}</span>
+						<span class="item-text">
+							Crafted <strong>{{this.output_name}}</strong> x{{this.output_qty}} via <strong>{{this.recipe_name}}</strong> ({{this.dt_cost}} {{#if (eq this.dt_cost 1)}}point{{else}}points{{/if}})
+						</span>
+					</div>
+					{{else}}
+					<div class="feed-empty">No crafting history yet.</div>
+					{{/each}}
+				</div>
+			</div>
+
+			{{else}}
+			<div class="empty-banner danger">
+				<i class="fas fa-user-slash"></i>
+				<div class="banner-text">
+					<h4>No Active Character</h4>
+					<p>Select or assign a controlled character token to access crafting.</p>
+				</div>
+			</div>
+			{{/if}}
+		</div>
+		{{/if}}
+
+		{{#if tabs.manage-recipes.active}}
+		<div class="tab manage-tab craft-manage-tab">
+			<div class="gm-top-panel">
+				<div class="section-title-row">
+					<h3 class="section-heading">Recipe Manager</h3>
+					<button class="action-btn outline-btn compact-btn" data-action="add-recipe">
+						<i class="fas fa-plus"></i> New Recipe
+					</button>
+				</div>
+			</div>
+
+			<div class="craft-manage-layout">
+				<div class="craft-recipes-editor">
+					{{#each recipes}}
+					<div class="config-card craft-recipe-editor-card" data-recipe-id="{{this.id}}">
+						<div class="config-header">
+							<input type="text" class="config-name-input" value="{{this.name}}" placeholder="Recipe Name..."
+								data-action="edit-recipe-field" data-field="name" data-recipe-id="{{this.id}}">
+							<button class="config-delete-btn" data-action="delete-recipe" data-recipe-id="{{this.id}}">
+								<i class="fas fa-trash-alt"></i>
+							</button>
+						</div>
+
+						<textarea class="config-desc-textarea" placeholder="Describe this recipe..."
+							data-action="edit-recipe-field" data-field="description" data-recipe-id="{{this.id}}">{{this.description}}</textarea>
+
+						<div class="craft-editor-row">
+							<div class="form-field craft-cost-field">
+								<label class="field-label">DT Cost</label>
+								<input type="number" class="field-input" value="{{this.dt_cost}}" min="0"
+									data-action="edit-recipe-field" data-field="dt_cost" data-recipe-id="{{this.id}}">
+							</div>
+						</div>
+
+						<div class="craft-slots-row">
+							<div class="craft-slot-column">
+								<span class="craft-slot-label">Ingredients</span>
+								<div class="drop-slot craft-ingredient-slot" data-recipe-id="{{this.id}}" data-slot-type="ingredient">
+									{{#if this.ingredients.length}}
+									<div class="craft-slot-items">
+										{{#each this.ingredients}}
+										<div class="craft-slot-item">
+											<img class="craft-ing-img" src="{{this.img}}" alt="{{this.name}}">
+											<span class="craft-ing-name">{{this.name}}</span>
+											<input type="number" class="craft-qty-input" value="{{this.quantity}}" min="1"
+												data-action="edit-recipe-field"
+												data-field="ingredient_quantity:{{this.uuid}}"
+												data-recipe-id="{{../id}}">
+											<button class="craft-remove-btn" data-action="remove-ingredient"
+												data-recipe-id="{{../id}}" data-ingredient-uuid="{{this.uuid}}">
+												<i class="fas fa-times"></i>
+											</button>
+										</div>
+										{{/each}}
+									</div>
+									{{/if}}
+									<div class="craft-drop-hint">
+										<i class="fas fa-plus-circle"></i>
+										<span>Drop items here</span>
+									</div>
+								</div>
+							</div>
+
+							<div class="craft-arrow-col">
+								<i class="fas fa-arrow-right craft-arrow"></i>
+							</div>
+
+							<div class="craft-slot-column craft-output-column">
+								<span class="craft-slot-label">Output</span>
+								<div class="drop-slot craft-output-slot" data-recipe-id="{{this.id}}" data-slot-type="output">
+									{{#if this.output.uuid}}
+									<div class="craft-slot-item craft-output-slot-item">
+										<img class="craft-ing-img" src="{{this.output.img}}" alt="{{this.output.name}}">
+										<span class="craft-ing-name">{{this.output.name}}</span>
+										<input type="number" class="craft-qty-input" value="{{this.output.quantity}}" min="1"
+											data-action="edit-recipe-field"
+											data-field="output_quantity"
+											data-recipe-id="{{this.id}}">
+									</div>
+									{{else}}
+									<div class="craft-drop-hint">
+										<i class="fas fa-plus-circle"></i>
+										<span>Drop output here</span>
+									</div>
+									{{/if}}
+								</div>
+							</div>
+						</div>
+					</div>
+					{{else}}
+					<div class="feed-empty craft-empty-recipes">
+						No recipes yet. Click <strong>New Recipe</strong> to create one, then drag items into the ingredient and output slots.
+					</div>
+					{{/each}}
+				</div>
+
+				<div class="craft-logs-sidebar">
+					<div class="section-title-row">
+						<h3 class="section-heading">Craft Logs</h3>
+						<button class="action-btn outline-btn danger-hover compact-btn" data-action="clear-craft-logs">
+							<i class="fas fa-trash-alt"></i> Clear
+						</button>
+					</div>
+					<div class="logs-feed craft-logs-feed">
+						{{#each craft_logs}}
+						<div class="feed-item">
+							<span class="item-time">{{this.formatted_time}}</span>
+							<span class="item-text">
+								<strong>{{this.actor_name}}</strong> crafted <strong>{{this.output_name}}</strong> x{{this.output_qty}} ({{this.dt_cost}} {{#if (eq this.dt_cost 1)}}point{{else}}points{{/if}})
+							</span>
+						</div>
+						{{else}}
+						<div class="feed-empty">No craft activity logged.</div>
+						{{/each}}
+					</div>
+				</div>
+			</div>
+		</div>
+		{{/if}}
+	</section>
+</div>

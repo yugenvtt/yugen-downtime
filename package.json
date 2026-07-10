@@ -1,7 +1,7 @@
 {
   "name": "yugen-downtime",
-  "version": "1.0.2",
-  "description": "downtime action and crafting manager for players to invest downtime points into macro actions.",
+  "version": "1.0.3",
+  "description": "Downtime action, crafting manager and perk tree system for players to invest downtime points into.",
   "main": "index.js",
   "type": "module",
   "scripts": {

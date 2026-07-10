@@ -1,0 +1,62 @@
+<div class="perk-tree-editor-container">
+	<div class="editor-content">
+		<div class="form-group">
+			<label>Tree Name</label>
+			<div class="form-fields">
+				<input type="text" name="name" value="{{tree.name}}" placeholder="New Perk Tree Name" required>
+			</div>
+		</div>
+
+		<div class="nodes-list-section">
+			<div class="section-title-row">
+				<h3 class="section-heading">Perk Nodes</h3>
+				<button type="button" class="action-btn outline-btn compact-btn" data-action="add-node">
+					<i class="fas fa-plus"></i> New Perk
+				</button>
+			</div>
+
+			<div class="config-list">
+				{{#each tree.nodes}}
+				<div class="config-row-item" data-node-id="{{this.id}}">
+					<div class="config-row-main">
+						<img class="config-row-avatar" src="{{this.icon}}" alt="{{this.name}}">
+						<div class="config-row-info">
+							<span class="config-row-name">{{this.name}}</span>
+							<div class="config-row-badges">
+								<span class="row-badge cost-badge">{{this.cost}} {{#if (eq this.cost 1)}}point{{else}}points{{/if}}</span>
+								{{#if this.requirements.length}}
+								<span class="row-badge req-badge" title="Requires: {{this.req_list}}">
+									<i class="fas fa-project-diagram"></i> Requires: {{this.req_list}}
+								</span>
+								{{/if}}
+								{{#if this.macro_name}}
+								<span class="row-badge macro-badge"><i class="fas fa-terminal"></i> {{this.macro_name}}</span>
+								{{/if}}
+								{{#if this.effect}}
+								<span class="row-badge effect-badge" title="Active Effect: {{this.effect.name}}"><i class="fas fa-magic"></i> Effect</span>
+								{{/if}}
+							</div>
+						</div>
+					</div>
+					<div class="config-row-actions">
+						<button type="button" class="config-row-btn edit-btn" data-action="edit-node" data-node-id="{{this.id}}" title="Edit Perk Node">
+							<i class="fas fa-edit"></i>
+						</button>
+						<button type="button" class="config-row-btn delete-btn" data-action="delete-node" data-node-id="{{this.id}}" title="Delete Perk Node">
+							<i class="fas fa-trash-alt"></i>
+						</button>
+					</div>
+				</div>
+				{{else}}
+				<div class="feed-empty">No perk nodes added yet. Click <strong>New Perk</strong> to populate the tree.</div>
+				{{/each}}
+			</div>
+		</div>
+	</div>
+
+	<footer class="sheet-footer">
+		<button type="button" data-action="save">
+			<i class="fas fa-save"></i> Save Tree
+		</button>
+	</footer>
+</div>

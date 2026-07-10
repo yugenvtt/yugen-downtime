@@ -13,9 +13,6 @@ export const init_hook = ( ): void =>
 	{
 		log( 'initializing yugen-downtime module' );
 
-		/** register socket handlers **/
-		SocketHandler.register( );
-
 		/** register module settings **/
 		/** lowercase purpose of the api call **/
 		( game as any ).settings.register( MODULE_ID, SETTINGS.DOWNTIME_MODE, 
@@ -26,6 +23,17 @@ export const init_hook = ( ): void =>
 			config: true,
 			type: Boolean,
 			default: false
+		} );
+
+		/** register user-specific interactive mode client setting **/
+		( game as any ).settings.register( MODULE_ID, SETTINGS.INTERACTIVE_MODE, 
+		{
+			name: ( game as any ).i18n.localize( 'yugen-downtime.settings.interactive-mode.name' ),
+			hint: ( game as any ).i18n.localize( 'yugen-downtime.settings.interactive-mode.hint' ),
+			scope: 'client',
+			config: true,
+			type: Boolean,
+			default: true
 		} );
 
 		/** lowercase purpose of the api call **/
@@ -78,11 +86,23 @@ export const init_hook = ( ): void =>
 			type: Number,
 			default: 0
 		} );
+
+		/** lowercase purpose of the api call **/
+		( game as any ).settings.register( MODULE_ID, SETTINGS.PERK_TREES, 
+		{
+			scope: 'world',
+			config: false,
+			type: Array,
+			default: [ ]
+		} );
 	} );
 
 	Hooks.once( 'ready', ( ) => 
 	{
 		log( 'ready hook triggered' );
+
+		/** register socket handlers **/
+		SocketHandler.register( );
 
 		/** lowercase purpose of the api call **/
 		Hooks.on( 'dnd5e.restCompleted', async ( actor: any, result: any ) => 

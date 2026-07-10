@@ -1,0 +1,82 @@
+<div class="action-editor-container">
+	<div class="editor-content">
+		<div class="form-group">
+			<label>Action Name</label>
+			<div class="form-fields">
+				<input type="text" name="name" value="{{action.name}}" placeholder="New Action Name" required>
+			</div>
+		</div>
+
+		<div class="form-group">
+			<label>Point Cost</label>
+			<div class="form-fields">
+				<input type="number" name="cost" value="{{action.cost}}" min="0" step="1">
+			</div>
+		</div>
+
+		<div class="form-group">
+			<label>Linked Macro</label>
+			<div class="form-fields">
+				<select name="macro_id">
+					<option value="">-- None --</option>
+					{{#each macros}}
+					<option value="{{this.id}}" {{#if (eq this.id ../action.macro_id)}}selected{{/if}}>{{this.name}}</option>
+					{{/each}}
+				</select>
+			</div>
+			<p class="hint">The macro will execute when the player buys this downtime action.</p>
+		</div>
+
+		<div class="form-group">
+			<label>Roll Check</label>
+			<div class="form-fields">
+				<select name="roll_check">
+					{{#each roll_choices}}
+					<option value="{{this.id}}" {{#if (eq this.id ../action.roll_check)}}selected{{/if}}>{{this.name}}</option>
+					{{/each}}
+				</select>
+			</div>
+		</div>
+
+		<div class="form-group">
+			<label>Target DC</label>
+			<div class="form-fields">
+				<input type="number" name="dc" value="{{action.dc}}" min="0" step="1">
+			</div>
+		</div>
+
+		<div class="form-group">
+			<label>Active Effect Reward</label>
+			<div class="form-fields">
+				{{#if action.effect}}
+				<span style="font-size: 0.8rem; color: #10b981; font-weight: 700; display: inline-flex; align-items: center; gap: 4px; padding-right: 8px;">
+					<i class="fas fa-check-circle"></i> Configured ({{action.effect.name}})
+				</span>
+				<button type="button" class="effect-control-btn" data-action="edit-effect" title="Edit Active Effect">
+					<i class="fas fa-edit"></i> Edit
+				</button>
+				<button type="button" class="effect-control-btn" data-action="remove-effect" title="Remove Active Effect" style="color: #f87171 !important;">
+					<i class="fas fa-trash-alt"></i> Remove
+				</button>
+				{{else}}
+				<button type="button" class="effect-control-btn" data-action="create-effect" style="flex: 1 !important; width: auto !important;">
+					<i class="fas fa-plus"></i> Configure Active Effect
+				</button>
+				{{/if}}
+			</div>
+		</div>
+
+		<div class="form-group stacked">
+			<label>Description</label>
+			<div class="form-fields">
+				<textarea name="description" placeholder="A brief explanation of the downtime action...">{{action.description}}</textarea>
+			</div>
+		</div>
+	</div>
+
+	<footer class="sheet-footer">
+		<button type="button" data-action="save">
+			<i class="fas fa-save"></i> Save Action
+		</button>
+	</footer>
+</div>

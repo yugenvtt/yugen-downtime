@@ -34,7 +34,7 @@ export default tseslint.config(
 				'error',
 				{
 					'selector': 'variable',
-					'format': [ 'snake_case', 'UPPER_CASE' ],
+					'format': [ 'snake_case', 'UPPER_CASE', 'PascalCase' ],
 				},
 				{
 					'selector': 'function',
@@ -50,6 +50,7 @@ export default tseslint.config(
 					'leadingUnderscore': 'allow',
 				}
 			],
+			'@typescript-eslint/no-unsafe-function-type': 'off',
 		},
 	},
 	prettierConfig,

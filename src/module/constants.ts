@@ -9,7 +9,8 @@ export const FLAGS =
 {
 	POINTS: 'points',
 	REST_SHORT_POINTS: 'rest-short-points',
-	REST_LONG_POINTS: 'rest-long-points'
+	REST_LONG_POINTS: 'rest-long-points',
+	PERK_TREES: 'perk-trees'
 };
 
 export const SETTINGS = 
@@ -22,5 +23,7 @@ export const SETTINGS =
 	REST_LONG_POINTS: 'rest-long-points',
 	CRAFT_ENABLED: 'craft-enabled',
 	RECIPES: 'recipes',
-	CRAFT_LOGS: 'craft-logs'
+	CRAFT_LOGS: 'craft-logs',
+	PERK_TREES: 'perk-trees',
+	INTERACTIVE_MODE: 'interactive-mode'
 };

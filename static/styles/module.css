@@ -286,6 +286,7 @@
 {
 	background: #f1f5f9;
 	border-color: #f1f5f9;
+	color: #0f172a !important;
 	box-shadow: 0 4px 12px rgba(255, 255, 255, 0.1);
 }
 
@@ -391,7 +392,7 @@
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
-	margin-bottom: 16px;
+	margin: 8px 0 16px 0;
 	height: 32px;
 }
 
@@ -402,7 +403,9 @@
 	color: var(--yugen-text-muted);
 	text-transform: uppercase;
 	letter-spacing: 1px;
-	margin: 0;
+	margin: 0 !important;
+	padding: 0 !important;
+	line-height: 24px !important;
 }
 
 .yugen-downtime .logs-feed
@@ -632,6 +635,62 @@
 	border-radius: 8px;
 	border-bottom: 1px solid rgba(255, 255, 255, 0.02);
 	background: rgba(255, 255, 255, 0.005);
+}
+
+.yugen-downtime .actor-feed-item.compact
+{
+	padding: 8px 10px;
+}
+
+.yugen-downtime .actor-details
+{
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	flex-grow: 1;
+}
+
+.yugen-downtime .actor-points-label
+{
+	font-size: 0.72rem;
+	color: var(--yugen-accent);
+	font-weight: 600;
+}
+
+.yugen-downtime .actor-edit-btn
+{
+	background: transparent !important;
+	border: 1px solid transparent !important;
+	color: var(--yugen-text-muted) !important;
+	cursor: pointer;
+	border-radius: 4px;
+	width: 24px;
+	height: 24px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	transition: all 0.2s ease;
+	font-size: 0.85rem;
+	margin: 0 !important;
+	padding: 0 !important;
+	box-sizing: border-box !important;
+}
+
+.yugen-downtime .actor-edit-btn:hover
+{
+	color: var(--yugen-accent) !important;
+	background: rgba(56, 189, 248, 0.08) !important;
+	border-color: rgba(56, 189, 248, 0.15) !important;
+}
+
+.yugen-downtime .actor-edit-btn i
+{
+	display: inline-block !important;
+	width: auto !important;
+	height: auto !important;
+	line-height: 1 !important;
+	margin: 0 !important;
+	padding: 0 !important;
 }
 
 .yugen-downtime .actor-row-main
@@ -1505,6 +1564,19 @@
 	justify-content: center;
 	transition: all 0.2s ease;
 	font-size: 0.85rem;
+	margin: 0 !important;
+	padding: 0 !important;
+	box-sizing: border-box !important;
+}
+
+.yugen-downtime .map-filter-btn i
+{
+	display: inline-block !important;
+	width: auto !important;
+	height: auto !important;
+	line-height: 1 !important;
+	margin: 0 !important;
+	padding: 0 !important;
 }
 
 .yugen-downtime .map-filter-btn:hover
@@ -1521,21 +1593,46 @@
 
 /** popup editors **/
 .yugen-app.action-editor,
-.yugen-app.recipe-editor
+.yugen-app.recipe-editor,
+.yugen-app.perk-tree-editor,
+.yugen-app.perk-node-editor,
+.yugen-app.active-effect-editor
 {
-	padding: 16px !important;
+	padding: 0 !important;
+}
+
+.yugen-downtime .action-editor-container,
+.yugen-downtime .recipe-editor-container,
+.yugen-downtime .perk-tree-editor-container,
+.yugen-downtime .perk-node-editor-container,
+.yugen-downtime .active-effect-editor-container
+{
+	padding: 16px;
+	box-sizing: border-box;
+	display: flex;
+	flex-direction: column;
+	height: 100%;
 }
 
 .yugen-app.action-editor .editor-content,
-.yugen-app.recipe-editor .editor-content
+.yugen-app.recipe-editor .editor-content,
+.yugen-app.perk-tree-editor .editor-content,
+.yugen-app.perk-node-editor .editor-content,
+.yugen-app.active-effect-editor .editor-content
 {
 	display: flex;
 	flex-direction: column;
 	gap: 14px;
+	flex-grow: 1;
+	overflow-y: auto;
+	overflow-x: hidden !important;
 }
 
 .yugen-app.action-editor .form-group,
-.yugen-app.recipe-editor .form-group
+.yugen-app.recipe-editor .form-group,
+.yugen-app.perk-tree-editor .form-group,
+.yugen-app.perk-node-editor .form-group,
+.yugen-app.active-effect-editor .form-group
 {
 	display: flex;
 	flex-direction: column;
@@ -1546,11 +1643,14 @@
 }
 
 .yugen-app.action-editor .form-group label,
-.yugen-app.recipe-editor .form-group label
+.yugen-app.recipe-editor .form-group label,
+.yugen-app.perk-tree-editor .form-group label,
+.yugen-app.perk-node-editor .form-group label,
+.yugen-app.active-effect-editor .form-group label
 {
 	font-size: 0.65rem;
 	font-weight: 700;
-	color: var(--yugen-text-muted);
+	color: var( --yugen-text-muted );
 	text-transform: uppercase;
 	letter-spacing: 0.5px;
 }
@@ -1559,7 +1659,15 @@
 .yugen-app.action-editor .form-fields select,
 .yugen-app.action-editor .form-fields textarea,
 .yugen-app.recipe-editor .form-fields input,
-.yugen-app.recipe-editor .form-fields textarea
+.yugen-app.recipe-editor .form-fields textarea,
+.yugen-app.perk-tree-editor .form-fields input,
+.yugen-app.perk-tree-editor .form-fields textarea,
+.yugen-app.perk-node-editor .form-fields input,
+.yugen-app.perk-node-editor .form-fields textarea,
+.yugen-app.perk-node-editor .form-fields select,
+.yugen-app.active-effect-editor .form-fields input,
+.yugen-app.active-effect-editor .form-fields textarea,
+.yugen-app.active-effect-editor .form-fields select
 {
 	background: rgba(0, 0, 0, 0.2) !important;
 	border: 1px solid rgba(255, 255, 255, 0.04) !important;
@@ -1569,23 +1677,48 @@
 	width: 100% !important;
 	font-size: 0.8rem !important;
 	box-shadow: none !important;
+	box-sizing: border-box !important;
 }
 
+/**
+ * override input width inside form fields to allow flexbox shrinking next to buttons
+ **/
+.yugen-app.action-editor .form-fields input,
+.yugen-app.recipe-editor .form-fields input,
+.yugen-app.perk-tree-editor .form-fields input,
+.yugen-app.perk-node-editor .form-fields input,
+.yugen-app.active-effect-editor .form-fields input
+{
+	flex: 1 !important;
+	min-width: 0 !important;
+	width: auto !important;
+}
+
+
 .yugen-app.action-editor .form-fields select,
-.yugen-app.recipe-editor .form-fields select
+.yugen-app.recipe-editor .form-fields select,
+.yugen-app.perk-tree-editor .form-fields select,
+.yugen-app.perk-node-editor .form-fields select,
+.yugen-app.active-effect-editor .form-fields select
 {
 	height: 30px !important;
 }
 
 .yugen-app.action-editor .form-fields textarea,
-.yugen-app.recipe-editor .form-fields textarea
+.yugen-app.recipe-editor .form-fields textarea,
+.yugen-app.perk-tree-editor .form-fields textarea,
+.yugen-app.perk-node-editor .form-fields textarea,
+.yugen-app.active-effect-editor .form-fields textarea
 {
 	min-height: 80px;
 	resize: vertical;
 }
 
 .yugen-app.action-editor .sheet-footer,
-.yugen-app.recipe-editor .sheet-footer
+.yugen-app.recipe-editor .sheet-footer,
+.yugen-app.perk-tree-editor .sheet-footer,
+.yugen-app.perk-node-editor .sheet-footer,
+.yugen-app.active-effect-editor .sheet-footer
 {
 	margin-top: 16px;
 	display: flex;
@@ -1593,9 +1726,12 @@
 }
 
 .yugen-app.action-editor .sheet-footer button,
-.yugen-app.recipe-editor .sheet-footer button
+.yugen-app.recipe-editor .sheet-footer button,
+.yugen-app.perk-tree-editor .sheet-footer button,
+.yugen-app.perk-node-editor .sheet-footer button,
+.yugen-app.active-effect-editor .sheet-footer button
 {
-	background: var(--yugen-accent) !important;
+	background: var( --yugen-accent ) !important;
 	color: #1e293b !important;
 	border: none !important;
 	padding: 8px 16px !important;
@@ -1607,18 +1743,893 @@
 }
 
 .yugen-app.action-editor .sheet-footer button:hover,
-.yugen-app.recipe-editor .sheet-footer button:hover
+.yugen-app.recipe-editor .sheet-footer button:hover,
+.yugen-app.perk-tree-editor .sheet-footer button:hover,
+.yugen-app.perk-node-editor .sheet-footer button:hover,
+.yugen-app.active-effect-editor .sheet-footer button:hover
 {
 	background: #7dd3fc !important;
 	box-shadow: 0 0 12px rgba(56, 189, 248, 0.3) !important;
 }
 
 .yugen-app.action-editor .hint,
-.yugen-app.recipe-editor .hint
+.yugen-app.recipe-editor .hint,
+.yugen-app.perk-tree-editor .hint,
+.yugen-app.perk-node-editor .hint,
+.yugen-app.active-effect-editor .hint
 {
 	font-size: 0.75rem;
-	color: var(--yugen-text-muted);
+	color: var( --yugen-text-muted );
 	margin-top: 4px;
 }
+
+/** ======================== PERKS PROGRESSION ======================== **/
+.yugen-downtime .perks-tab
+{
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+}
+
+.yugen-downtime .perks-layout-container
+{
+	display: flex;
+	flex: 1;
+	gap: 20px;
+	height: calc( 100% - 90px );
+	overflow: hidden;
+}
+
+.yugen-downtime .perks-sidebar
+{
+	width: 240px;
+	background: rgba(0, 0, 0, 0.2);
+	border: 1px solid rgba(255, 255, 255, 0.05);
+	border-radius: 12px;
+	padding: 16px;
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	overflow-y: auto;
+}
+
+.yugen-downtime .sidebar-heading
+{
+	font-size: 0.75rem;
+	font-weight: 700;
+	text-transform: uppercase;
+	color: var( --yugen-text-muted );
+	letter-spacing: 1px;
+	margin: 0 0 4px 0;
+	border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+	padding-bottom: 8px;
+}
+
+.yugen-downtime .sidebar-tree-list
+{
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.yugen-downtime .sidebar-tree-btn
+{
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	background: rgba(255, 255, 255, 0.02);
+	border: 1px solid rgba(255, 255, 255, 0.04);
+	color: var( --yugen-text-secondary );
+	padding: 10px 14px;
+	border-radius: 8px;
+	text-align: left;
+	cursor: pointer;
+	transition: all 0.2s ease;
+	font-size: 0.85rem;
+}
+
+.yugen-downtime .sidebar-tree-btn:hover
+{
+	background: rgba(255, 255, 255, 0.06);
+	color: #ffffff;
+	border-color: rgba(255, 255, 255, 0.1);
+}
+
+.yugen-downtime .sidebar-tree-btn.active
+{
+	background: rgba(56, 189, 248, 0.1);
+	border-color: var( --yugen-accent );
+	color: #ffffff;
+}
+
+.yugen-downtime .perks-main-area
+{
+	flex: 1;
+	background: rgba(0, 0, 0, 0.15);
+	border: 1px solid rgba(255, 255, 255, 0.04);
+	border-radius: 12px;
+	padding: 20px;
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+	overflow-y: auto;
+}
+
+.yugen-downtime .active-tree-header
+{
+	border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+	padding-bottom: 16px;
+}
+
+.yugen-downtime .active-tree-title
+{
+	font-size: 1.35rem;
+	font-weight: 700;
+	color: #ffffff;
+	margin: 0 0 6px 0;
+}
+
+.yugen-downtime .active-tree-desc
+{
+	font-size: 0.85rem;
+	color: var( --yugen-text-muted );
+	margin: 0;
+	line-height: 1.4;
+}
+
+.yugen-downtime .tree-grid-display
+{
+	display: flex;
+	flex-direction: column;
+	gap: 24px;
+}
+
+.yugen-downtime .tree-tier-row
+{
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+	padding-bottom: 16px;
+}
+
+.yugen-downtime .tree-tier-row:last-child
+{
+	border-bottom: none;
+	padding-bottom: 0;
+}
+
+.yugen-downtime .tier-number-label
+{
+	font-size: 0.75rem;
+	font-weight: 700;
+	text-transform: uppercase;
+	color: var( --yugen-accent );
+	letter-spacing: 1.5px;
+}
+
+.yugen-downtime .tier-nodes-row
+{
+	display: grid;
+	grid-template-columns: repeat( auto-fill, minmax( 280px, 1fr ) );
+	gap: 16px;
+}
+
+.yugen-downtime .perk-node-card
+{
+	background: rgba(255, 255, 255, 0.02);
+	border: 1px solid rgba(255, 255, 255, 0.05);
+	border-radius: 10px;
+	padding: 12px;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	gap: 12px;
+	transition: all 0.2s ease;
+}
+
+.yugen-downtime .perk-node-card.unlocked
+{
+	border-color: rgba(16, 185, 129, 0.3);
+	background: rgba(16, 185, 129, 0.03);
+	box-shadow: 0 0 10px rgba(16, 185, 129, 0.05);
+}
+
+.yugen-downtime .perk-node-card.locked
+{
+	opacity: 0.5;
+}
+
+.yugen-downtime .perk-node-card.available
+{
+	border-color: rgba(56, 189, 248, 0.2);
+}
+
+.yugen-downtime .perk-node-card.available:hover
+{
+	background: rgba(255, 255, 255, 0.04);
+	border-color: rgba(56, 189, 248, 0.4);
+}
+
+.yugen-downtime .node-main-content
+{
+	display: flex;
+	gap: 12px;
+}
+
+.yugen-downtime .node-icon
+{
+	width: 44px;
+	height: 44px;
+	border-radius: 6px;
+	border: 1px solid rgba(255, 255, 255, 0.1);
+	object-fit: cover;
+}
+
+.yugen-downtime .node-info
+{
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+.yugen-downtime .node-name
+{
+	font-size: 0.95rem;
+	font-weight: 700;
+	color: #ffffff;
+	margin: 0;
+}
+
+.yugen-downtime .node-desc
+{
+	font-size: 0.8rem;
+	color: var( --yugen-text-muted );
+	margin: 0;
+	line-height: 1.3;
+}
+
+.yugen-downtime .node-meta
+{
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+	margin-top: 6px;
+}
+
+.yugen-downtime .node-badge
+{
+	font-size: 0.7rem;
+	padding: 2px 6px;
+	border-radius: 4px;
+	font-weight: 600;
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+}
+
+.yugen-downtime .node-badge.req-badge
+{
+	background: rgba(239, 68, 68, 0.15);
+	color: #f87171;
+}
+
+.yugen-downtime .node-badge.macro-badge
+{
+	background: rgba(56, 189, 248, 0.15);
+	color: #38bdf8;
+}
+
+.yugen-downtime .node-badge.effect-badge
+{
+	background: rgba(167, 139, 250, 0.15);
+	color: #c084fc;
+}
+
+.yugen-downtime .node-action-col
+{
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	border-top: 1px solid rgba(255, 255, 255, 0.03);
+	padding-top: 8px;
+	gap: 12px;
+}
+
+.yugen-downtime .unlocked-status-badge
+{
+	font-size: 0.75rem;
+	color: #34d399;
+	font-weight: 700;
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+}
+
+.yugen-downtime .locked-status-badge
+{
+	font-size: 0.75rem;
+	color: var( --yugen-text-muted );
+	font-weight: 700;
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+}
+
+.yugen-downtime .node-unlock-btn
+{
+	width: 100%;
+	font-size: 0.75rem;
+	padding: 6px 12px;
+	background: var( --yugen-accent ) !important;
+	color: #000000 !important;
+}
+
+.yugen-downtime .node-unlock-btn:disabled
+{
+	opacity: 0.6 !important;
+	cursor: not-allowed !important;
+	background: rgba(255, 255, 255, 0.05) !important;
+	color: var( --yugen-text-muted ) !important;
+}
+
+.yugen-downtime .gm-node-actions
+{
+	display: flex;
+	gap: 6px;
+}
+
+.yugen-downtime .refund-node-btn
+{
+	padding: 4px 10px !important;
+	font-size: 0.75rem !important;
+	line-height: 1 !important;
+	height: 24px !important;
+	background: rgba(234, 179, 8, 0.1) !important;
+	border: 1px solid rgba(234, 179, 8, 0.3) !important;
+	color: #eab308 !important;
+	border-radius: 6px !important;
+	cursor: pointer !important;
+	font-weight: 600 !important;
+	flex: 0 0 auto !important;
+	width: auto !important;
+	transition: all 0.15s ease !important;
+}
+
+.yugen-downtime .refund-node-btn:hover
+{
+	background: rgba(234, 179, 8, 0.2) !important;
+	border-color: rgba(234, 179, 8, 0.5) !important;
+}
+
+.yugen-downtime .revoke-node-btn
+{
+	padding: 4px 10px !important;
+	font-size: 0.75rem !important;
+	line-height: 1 !important;
+	height: 24px !important;
+	background: rgba(239, 68, 68, 0.1) !important;
+	border: 1px solid rgba(239, 68, 68, 0.3) !important;
+	color: #ef4444 !important;
+	border-radius: 6px !important;
+	cursor: pointer !important;
+	font-weight: 600 !important;
+	flex: 0 0 auto !important;
+	width: auto !important;
+	transition: all 0.15s ease !important;
+}
+
+.yugen-downtime .revoke-node-btn:hover
+{
+	background: rgba(239, 68, 68, 0.2) !important;
+	border-color: rgba(239, 68, 68, 0.5) !important;
+}
+
+/** ======================== CHARACTER LIST ASSIGNMENTS ======================== **/
+.yugen-downtime .actor-row-trees
+{
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	margin-top: 10px;
+	padding-top: 10px;
+	border-top: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.yugen-downtime .actor-trees-list
+{
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+	align-items: center;
+}
+
+.yugen-downtime .actor-tree-badge
+{
+	background: rgba(255, 255, 255, 0.04);
+	border: 1px solid rgba(255, 255, 255, 0.06);
+	border-radius: 6px;
+	padding: 3px 8px;
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	font-size: 0.75rem;
+	color: #ffffff;
+	max-width: 100%;
+	box-sizing: border-box;
+}
+
+.yugen-downtime .actor-tree-badge span
+{
+	text-overflow: ellipsis;
+	overflow: hidden;
+	white-space: nowrap;
+}
+
+.yugen-downtime .remove-tree-btn
+{
+	background: none !important;
+	border: none !important;
+	color: #f87171 !important;
+	cursor: pointer !important;
+	padding: 0 !important;
+	font-size: 0.75rem !important;
+	line-height: 1 !important;
+}
+
+.yugen-downtime .remove-tree-btn:hover
+{
+	color: #ef4444 !important;
+}
+
+.yugen-downtime .assign-tree-dropdown select
+{
+	background: rgba(0, 0, 0, 0.25) !important;
+	border: 1px dashed rgba(255, 255, 255, 0.15) !important;
+	border-radius: 6px !important;
+	color: var( --yugen-text-muted ) !important;
+	font-size: 0.75rem !important;
+	padding: 2px 6px !important;
+	height: auto !important;
+	cursor: pointer !important;
+}
+
+.yugen-downtime .assign-tree-dropdown select:hover
+{
+	border-color: var( --yugen-accent ) !important;
+	color: #ffffff !important;
+}
+
+/** ======================== DYNAMIC ACTIVE EFFECT EDITOR ======================== **/
+.yugen-downtime .custom-effect-fields
+{
+	margin-top: 14px;
+	padding: 12px;
+	background: rgba(0, 0, 0, 0.15);
+	border: 1px solid rgba(255, 255, 255, 0.05);
+	border-radius: 8px;
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+
+.yugen-downtime .effect-changes-section
+{
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	margin-top: 8px;
+	border-top: 1px solid rgba(255, 255, 255, 0.05);
+	padding-top: 12px;
+}
+
+.yugen-downtime .changes-header
+{
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	font-size: 0.8rem;
+	font-weight: 700;
+	color: #ffffff;
+}
+
+.yugen-downtime .changes-list
+{
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+
+.yugen-downtime .change-row
+{
+	display: flex !important;
+	gap: 8px !important;
+	align-items: center !important;
+	width: 100% !important;
+}
+
+.yugen-downtime input.change-key-input,
+.yugen-downtime select.change-mode-select,
+.yugen-downtime input.change-value-input
+{
+	background: rgba(0, 0, 0, 0.25) !important;
+	border: 1px solid rgba(255, 255, 255, 0.08) !important;
+	border-radius: 6px !important;
+	color: #ffffff !important;
+	padding: 4px 8px !important;
+	font-size: 0.75rem !important;
+	box-shadow: none !important;
+	height: 28px !important;
+	box-sizing: border-box !important;
+	min-width: 0 !important;
+	width: 100% !important;
+}
+
+.yugen-downtime input.change-key-input::placeholder,
+.yugen-downtime input.change-value-input::placeholder
+{
+	color: rgba(255, 255, 255, 0.4) !important;
+}
+
+.yugen-downtime input.change-key-input
+{
+	flex: 2 !important;
+}
+
+.yugen-downtime select.change-mode-select
+{
+	flex: 1 !important;
+}
+
+.yugen-downtime input.change-value-input
+{
+	flex: 1 !important;
+}
+
+.yugen-downtime button.change-remove-btn
+{
+	background: none !important;
+	border: none !important;
+	color: #f87171 !important;
+	cursor: pointer !important;
+	padding: 4px !important;
+	font-size: 0.85rem !important;
+	flex: 0 0 auto !important;
+	width: auto !important;
+}
+
+.yugen-downtime button.change-remove-btn:hover
+{
+	color: #ef4444 !important;
+}
+
+.yugen-downtime .requirements-checkbox-list
+{
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	max-height: 120px;
+	overflow-y: auto;
+	background: rgba(0, 0, 0, 0.2);
+	border: 1px solid rgba(255, 255, 255, 0.05);
+	border-radius: 6px;
+	padding: 8px;
+}
+
+.yugen-downtime .perk-node-editor .checkbox-label
+{
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	font-size: 0.8rem;
+	color: var( --yugen-text-secondary );
+	cursor: pointer;
+}
+
+.yugen-downtime .perk-node-editor .checkbox-label input
+{
+	margin: 0;
+	width: auto;
+	height: auto;
+}
+
+.yugen-downtime .perk-node-editor .checkbox-label:hover
+{
+	color: #ffffff;
+}
+
+.yugen-downtime .perk-node-editor .file-picker-btn
+{
+	background: rgba(255, 255, 255, 0.05) !important;
+	border: 1px solid rgba(255, 255, 255, 0.08) !important;
+	color: #ffffff !important;
+	cursor: pointer !important;
+	border-radius: 4px !important;
+	padding: 2px 8px !important;
+	font-size: 0.75rem !important;
+}
+
+.yugen-downtime .perk-node-editor .file-picker-btn:hover
+{
+	background: rgba(255, 255, 255, 0.1) !important;
+	border-color: var( --yugen-accent ) !important;
+}
+
+.yugen-app.perk-tree-editor .config-row-main
+{
+	display: flex;
+	flex-direction: row !important;
+	align-items: center;
+	gap: 12px;
+}
+
+.yugen-app.perk-tree-editor .config-row-avatar
+{
+	width: 38px !important;
+	height: 38px !important;
+	border-radius: 6px;
+	border: 1px solid rgba(255, 255, 255, 0.12);
+	object-fit: cover;
+}
+
+.yugen-app.perk-tree-editor .config-row-info
+{
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+.yugen-downtime .effect-control-btn
+{
+	background: rgba(255, 255, 255, 0.05) !important;
+	border: 1px solid rgba(255, 255, 255, 0.08) !important;
+	color: #ffffff !important;
+	cursor: pointer !important;
+	border-radius: 4px !important;
+	padding: 4px 10px !important;
+	font-size: 0.75rem !important;
+	box-sizing: border-box !important;
+}
+
+.yugen-downtime .effect-control-btn:hover
+{
+	background: rgba(255, 255, 255, 0.1) !important;
+	border-color: var( --yugen-accent ) !important;
+}
+
+/**
+ * interactive overlay styling for yugen-downtime
+ **/
+
+.interactive-overlay-backdrop
+{
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100vw;
+	height: 100vh;
+	background: rgba(0, 0, 0, 0.7);
+	backdrop-filter: blur(8px);
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	z-index: 99999;
+}
+
+.interactive-wheel-menu
+{
+	position: relative;
+	width: 450px;
+	height: 420px;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	align-items: center;
+	padding: 20px;
+	box-sizing: border-box;
+}
+
+.wheel-lines
+{
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	z-index: 1;
+	pointer-events: none;
+}
+
+.wheel-line
+{
+	stroke: rgba(255, 145, 0, 0.4);
+	stroke-width: 3;
+	stroke-dasharray: 6 4;
+	animation: wheel-line-flow 20s linear infinite;
+}
+
+.wheel-line.line-actions
+{
+	stroke: rgba(255, 87, 34, 0.5);
+}
+
+.wheel-line.line-craft
+{
+	stroke: rgba(0, 176, 255, 0.5);
+}
+
+.wheel-line.line-perks
+{
+	stroke: rgba(0, 230, 118, 0.5);
+}
+
+@keyframes wheel-line-flow
+{
+	to
+	{
+		stroke-dashoffset: -100;
+	}
+}
+
+.main-avatar-container
+{
+	display: flex;
+	justify-content: center;
+	width: 100%;
+	z-index: 2;
+}
+
+.avatar-circle
+{
+	border-radius: 50%;
+	overflow: hidden;
+	box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+	border: 3px solid rgba(255, 255, 255, 0.1);
+	background: #111;
+}
+
+.avatar-circle img
+{
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	display: block;
+}
+
+.main-avatar
+{
+	width: 120px;
+	height: 120px;
+	border-color: var( --yugen-accent, #ff9100 );
+	box-shadow: 0 0 25px rgba(255, 145, 0, 0.25);
+}
+
+.wheel-options
+{
+	display: grid;
+	width: 100%;
+	z-index: 2;
+	justify-items: center;
+}
+
+.wheel-options.has-three
+{
+	grid-template-columns: repeat(3, 1fr);
+	gap: 20px;
+}
+
+.wheel-options.has-two
+{
+	grid-template-columns: repeat(2, 1fr);
+	gap: 40px;
+	max-width: 300px;
+}
+
+.option-circle
+{
+	position: relative;
+	width: 90px;
+	height: 90px;
+	cursor: pointer;
+	opacity: 0.65;
+}
+
+.option-circle img
+{
+	filter: brightness(0.4) blur(1px);
+	transition: all 0.3s ease;
+}
+
+.option-overlay
+{
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background: rgba(255, 255, 255, 0.15);
+	backdrop-filter: blur(2px);
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	border-radius: 50%;
+	transition: all 0.3s ease;
+}
+
+.option-label
+{
+	color: #ffffff;
+	font-weight: 700;
+	font-size: 0.85rem;
+	letter-spacing: 0.5px;
+	text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9);
+	pointer-events: none;
+	text-align: center;
+	user-select: none;
+}
+
+.option-circle.circle-actions
+{
+	border-color: rgba(255, 87, 34, 0.25);
+}
+
+.option-circle.circle-craft
+{
+	border-color: rgba(0, 176, 255, 0.25);
+}
+
+.option-circle.circle-perks
+{
+	border-color: rgba(0, 230, 118, 0.25);
+}
+
+.option-circle:hover
+{
+	opacity: 1;
+	transform: scale(1.08);
+}
+
+.option-circle.circle-actions:hover
+{
+	border-color: #ff5722;
+	box-shadow: 0 0 20px rgba(255, 87, 34, 0.4);
+}
+
+.option-circle.circle-craft:hover
+{
+	border-color: #00b0ff;
+	box-shadow: 0 0 20px rgba(0, 176, 255, 0.4);
+}
+
+.option-circle.circle-perks:hover
+{
+	border-color: #00e676;
+	box-shadow: 0 0 20px rgba(0, 230, 118, 0.4);
+}
+
+.option-circle:hover img
+{
+	filter: brightness(0.6) blur(0px);
+}
+
+.option-circle.circle-actions:hover .option-overlay
+{
+	background: rgba(255, 87, 34, 0.25);
+}
+
+.option-circle.circle-craft:hover .option-overlay
+{
+	background: rgba(0, 176, 255, 0.25);
+}
+
+.option-circle.circle-perks:hover .option-overlay
+{
+	background: rgba(0, 230, 118, 0.25);
+}
+
+
+
 
 

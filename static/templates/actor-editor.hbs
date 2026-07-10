@@ -1,0 +1,60 @@
+<div class="action-editor-container">
+	<div class="editor-header" style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); padding-bottom: 12px;">
+		<img src="{{actor.img}}" alt="{{actor.name}}" style="width: 40px; height: 40px; border-radius: 6px; border: 1px solid rgba(255, 255, 255, 0.05);">
+		<h2 style="margin: 0; font-size: 1.1rem; font-weight: 700; color: #ffffff;">{{actor.name}}</h2>
+	</div>
+
+	<div class="editor-content">
+		<div class="form-group">
+			<label>Current Downtime Points</label>
+			<div class="form-fields">
+				<input type="number" name="points" value="{{actor.points}}" min="0" step="1" required style="width: 100% !important;">
+			</div>
+		</div>
+
+		<div class="form-group">
+			<label>Short Rest Point Gain</label>
+			<div class="form-fields">
+				<input type="number" name="rest_short" value="{{actor.rest_short}}" min="0" step="1" style="width: 100% !important;">
+			</div>
+		</div>
+
+		<div class="form-group">
+			<label>Long Rest Point Gain</label>
+			<div class="form-fields">
+				<input type="number" name="rest_long" value="{{actor.rest_long}}" min="0" step="1" style="width: 100% !important;">
+			</div>
+		</div>
+
+		<div class="form-group stacked" style="margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255, 255, 255, 0.03);">
+			<label>Assigned Perk Trees</label>
+			<div class="actor-trees-list" style="display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 6px;">
+				{{#each actor.assigned_trees}}
+				<div class="actor-tree-badge">
+					<span>{{this.name}}</span>
+					<button type="button" class="remove-tree-btn" data-action="unassign-tree" data-tree-id="{{this.id}}" title="Remove Perk Tree">
+						<i class="fas fa-times"></i>
+					</button>
+				</div>
+				{{/each}}
+				
+				{{#if actor.unassigned_trees.length}}
+				<div class="assign-tree-dropdown">
+					<select class="assign-tree-select" data-action="assign-tree">
+						<option value="" disabled selected>+ Assign Perk Tree...</option>
+						{{#each actor.unassigned_trees}}
+						<option value="{{this.id}}">{{this.name}}</option>
+						{{/each}}
+					</select>
+				</div>
+				{{/if}}
+			</div>
+		</div>
+	</div>
+
+	<footer class="sheet-footer">
+		<button type="button" data-action="save">
+			<i class="fas fa-save"></i> Save Configuration
+		</button>
+	</footer>
+</div>

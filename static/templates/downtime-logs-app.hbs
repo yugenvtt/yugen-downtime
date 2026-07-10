@@ -1,0 +1,67 @@
+<div class="downtime-app-container yugen-logs-container">
+	<header class="downtime-header">
+		<div class="downtime-branding">
+			<h1 class="branding-title">yugen-downtime | logs</h1>
+		</div>
+		<nav class="sheet-tabs tabs" data-group="logs">
+			{{#each tabs}}
+			<a class="item {{this.cssClass}}" data-action="tab" data-group="{{this.group}}" data-tab="{{this.id}}">
+				<i class="{{this.icon}}"></i> {{this.label}}
+			</a>
+			{{/each}}
+		</nav>
+	</header>
+
+	<section class="sheet-body">
+		{{!-- ======================== DOWNTIME LOGS ======================== --}}
+		{{#if tabs.downtime-logs.active}}
+		<div class="tab logs-tab">
+			<div class="section-title-row">
+				<h3 class="section-heading">Downtime Activity</h3>
+				<button class="action-btn outline-btn danger-hover compact-btn" data-action="clear-logs">
+					<i class="fas fa-trash-alt"></i> Clear
+				</button>
+			</div>
+			<div class="logs-feed logs-window-feed">
+				{{#each logs}}
+				<div class="feed-item">
+					<span class="item-time">{{this.formatted_time}}</span>
+					<span class="item-text">
+						<strong>{{this.actor_name}}</strong> invested in <strong>{{this.action_name}}</strong> ({{this.cost}} {{#if (eq this.cost 1)}}point{{else}}points{{/if}})
+						{{#if this.roll_check}}
+						- Rolled <strong>{{this.roll_total}}</strong> {{#if this.dc}}vs DC {{this.dc}}{{/if}} ({{#if this.roll_success}}<span class="success-text">Success</span>{{else}}<span class="failure-text">Failure</span>{{/if}})
+						{{/if}}
+					</span>
+				</div>
+				{{else}}
+				<div class="feed-empty">No activity has been logged yet.</div>
+				{{/each}}
+			</div>
+		</div>
+		{{/if}}
+
+		{{!-- ======================== CRAFT LOGS ======================== --}}
+		{{#if tabs.craft-logs.active}}
+		<div class="tab logs-tab">
+			<div class="section-title-row">
+				<h3 class="section-heading">Crafting Activity</h3>
+				<button class="action-btn outline-btn danger-hover compact-btn" data-action="clear-craft-logs">
+					<i class="fas fa-trash-alt"></i> Clear
+				</button>
+			</div>
+			<div class="logs-feed logs-window-feed">
+				{{#each craft_logs}}
+				<div class="feed-item">
+					<span class="item-time">{{this.formatted_time}}</span>
+					<span class="item-text">
+						<strong>{{this.actor_name}}</strong> crafted <strong>{{this.output_name}}</strong> x{{this.output_qty}} ({{this.dt_cost}} {{#if (eq this.dt_cost 1)}}point{{else}}points{{/if}})
+					</span>
+				</div>
+				{{else}}
+				<div class="feed-empty">No crafting activity has been logged yet.</div>
+				{{/each}}
+			</div>
+		</div>
+		{{/if}}
+	</section>
+</div>

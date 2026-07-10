@@ -1,0 +1,48 @@
+<div class="interactive-overlay-backdrop" data-action="close">
+	<div class="interactive-wheel-menu">
+		<!-- svg canvas for connection lines -->
+		<svg class="wheel-lines" viewBox="0 0 400 350" preserveAspectRatio="none">
+			{{#if craft_enabled}}
+			<line x1="168" y1="141" x2="104" y2="242" class="wheel-line line-actions" />
+			<line x1="200" y1="150" x2="200" y2="235" class="wheel-line line-craft" />
+			<line x1="232" y1="141" x2="296" y2="242" class="wheel-line line-perks" />
+			{{else}}
+			<line x1="174" y1="144" x2="129" y2="239" class="wheel-line line-actions" />
+			<line x1="226" y1="144" x2="271" y2="239" class="wheel-line line-perks" />
+			{{/if}}
+		</svg>
+
+		<!-- central main character avatar -->
+		<div class="main-avatar-container">
+			<div class="avatar-circle main-avatar">
+				<img src="{{avatar_img}}" alt="Character Avatar" />
+			</div>
+		</div>
+
+		<!-- the three options below -->
+		<div class="wheel-options {{#if craft_enabled}}has-three{{else}}has-two{{/if}}">
+			<div class="avatar-circle option-circle circle-actions" data-action="open-tab" data-tab="actions">
+				<img src="{{avatar_img}}" alt="Actions" />
+				<div class="option-overlay">
+					<span class="option-label">Actions</span>
+				</div>
+			</div>
+
+			{{#if craft_enabled}}
+			<div class="avatar-circle option-circle circle-craft" data-action="open-tab" data-tab="craft">
+				<img src="{{avatar_img}}" alt="Crafting" />
+				<div class="option-overlay">
+					<span class="option-label">Crafting</span>
+				</div>
+			</div>
+			{{/if}}
+
+			<div class="avatar-circle option-circle circle-perks" data-action="open-tab" data-tab="perks">
+				<img src="{{avatar_img}}" alt="Perks" />
+				<div class="option-overlay">
+					<span class="option-label">Perks</span>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

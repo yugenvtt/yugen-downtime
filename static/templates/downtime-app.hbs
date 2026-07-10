@@ -35,7 +35,7 @@
 				<div class="action-card {{#unless this.can_afford}}disabled{{/unless}}">
 					<div class="card-header-row">
 						<h3 class="card-title">{{this.name}}</h3>
-						<span class="card-cost">{{this.cost}} pts</span>
+						<span class="card-cost">{{this.cost}} {{#if (eq this.cost 1)}}point{{else}}points{{/if}}</span>
 					</div>
 					<p class="card-desc">{{this.description}}</p>
 
@@ -77,7 +77,7 @@
 					<div class="feed-item">
 						<span class="item-time">{{this.formatted_time}}</span>
 						<span class="item-text">
-							Invested in <strong>{{this.action_name}}</strong> ({{this.cost}} pts)
+							Invested in <strong>{{this.action_name}}</strong> ({{this.cost}} {{#if (eq this.cost 1)}}point{{else}}points{{/if}})
 							{{#if this.roll_check}}
 							- Rolled <strong>{{this.roll_total}}</strong> {{#if this.dc}}vs DC {{this.dc}}{{/if}} ({{#if this.roll_success}}<span class="success-text">Success</span>{{else}}<span class="failure-text">Failure</span>{{/if}})
 							{{/if}}
@@ -123,7 +123,7 @@
 					<div class="craft-recipe-card {{#unless this.can_craft}}disabled{{/unless}}">
 						<div class="card-header-row">
 							<h3 class="card-title">{{this.name}}</h3>
-							<span class="card-cost">{{this.dt_cost}} pts</span>
+							<span class="card-cost">{{this.dt_cost}} {{#if (eq this.dt_cost 1)}}point{{else}}points{{/if}}</span>
 						</div>
 
 						{{#if this.description}}
@@ -198,7 +198,7 @@
 					<div class="feed-item">
 						<span class="item-time">{{this.formatted_time}}</span>
 						<span class="item-text">
-							Crafted <strong>{{this.output_name}}</strong> x{{this.output_qty}} via <strong>{{this.recipe_name}}</strong> ({{this.dt_cost}} pts)
+							Crafted <strong>{{this.output_name}}</strong> x{{this.output_qty}} via <strong>{{this.recipe_name}}</strong> ({{this.dt_cost}} {{#if (eq this.dt_cost 1)}}point{{else}}points{{/if}})
 						</span>
 					</div>
 					{{else}}
@@ -213,6 +213,157 @@
 				<div class="banner-text">
 					<h4>No Active Character</h4>
 					<p>Please select or assign a controlled character token to access crafting.</p>
+				</div>
+			</div>
+			{{/if}}
+		</div>
+		{{/if}}
+
+		{{!-- ======================== PERKS TAB ======================== --}}
+		{{#if tabs.perks.active}}
+		<div class="tab actions-tab perks-tab">
+			{{#if player.has_actor}}
+			<div class="player-hero">
+				<div class="hero-left">
+					<span class="hero-subtitle">perk tree progression</span>
+					<h2 class="hero-title">{{player.name}}</h2>
+				</div>
+				<div class="hero-points-card">
+					<span class="points-val">{{player.points}}</span>
+					<span class="points-lbl">Points</span>
+				</div>
+			</div>
+
+			{{#if is_active}}
+				{{#if player_trees.length}}
+				<div class="perks-layout-container">
+					<div class="perks-sidebar">
+						<h4 class="sidebar-heading">My Perk Trees</h4>
+						<div class="sidebar-tree-list">
+							{{#each player_trees}}
+							<button type="button" class="sidebar-tree-btn {{#if (eq this.id ../active_tree.id)}}active{{/if}}" data-action="select-player-tree" data-tree-id="{{this.id}}">
+								<i class="fas fa-project-diagram"></i>
+								<span>{{this.name}}</span>
+							</button>
+							{{/each}}
+						</div>
+					</div>
+
+					<div class="perks-main-area">
+						{{#if active_tree}}
+						<div class="active-tree-header">
+							<h3 class="active-tree-title">{{active_tree.name}}</h3>
+						</div>
+
+						<div class="tree-grid-display">
+							{{#each active_tree.tiers}}
+							<div class="tree-tier-row">
+								<span class="tier-number-label">Tier {{this.tier_number}}</span>
+								<div class="tier-nodes-row">
+									{{#each this.nodes}}
+									<div class="perk-node-card {{#if this.is_unlocked}}unlocked{{/if}} {{#if this.is_locked}}locked{{/if}} {{#if this.is_available}}available{{/if}}">
+										<div class="node-main-content">
+											<img class="node-icon" src="{{this.icon}}" alt="{{this.name}}">
+											<div class="node-info">
+												<h4 class="node-name">{{this.name}}</h4>
+												<p class="node-desc">{{this.description}}</p>
+												
+												<div class="node-meta">
+													{{#if this.requirements.length}}
+													<span class="node-badge req-badge" title="Requires: {{this.req_list}}">
+														<i class="fas fa-lock"></i> Requires: {{this.req_list}}
+													</span>
+													{{/if}}
+													{{#if this.macro_name}}
+													<span class="node-badge macro-badge"><i class="fas fa-terminal"></i> {{this.macro_name}}</span>
+													{{/if}}
+													{{#if this.effect}}
+													<span class="node-badge effect-badge" title="Active Effect: {{this.effect.name}}"><i class="fas fa-magic"></i> Effect</span>
+													{{/if}}
+												</div>
+											</div>
+										</div>
+										
+										<div class="node-action-col">
+											{{#if this.is_unlocked}}
+											<span class="unlocked-status-badge"><i class="fas fa-check-circle"></i> Unlocked</span>
+											{{#if ../../is_gm}}
+											<div class="gm-node-actions">
+												<button type="button" class="action-btn buy-btn refund-node-btn" 
+													data-action="refund-node" 
+													data-actor-id="{{../../player.id}}"
+													data-tree-id="{{../../active_tree.id}}"
+													data-node-id="{{this.id}}"
+													title="Refund Perk (Locks node & refunds point cost)">
+													Refund
+												</button>
+												<button type="button" class="action-btn buy-btn revoke-node-btn" 
+													data-action="revoke-node" 
+													data-actor-id="{{../../player.id}}"
+													data-tree-id="{{../../active_tree.id}}"
+													data-node-id="{{this.id}}"
+													title="Revoke Perk (Locks node without refunding points)">
+													Revoke
+												</button>
+											</div>
+											{{/if}}
+											{{/if}}
+											{{#if this.is_locked}}
+											<span class="locked-status-badge"><i class="fas fa-lock"></i> Locked</span>
+											{{/if}}
+											{{#if this.is_available}}
+											<button type="button" class="action-btn buy-btn node-unlock-btn" 
+												data-action="unlock-node" 
+												data-actor-id="{{../../player.id}}"
+												data-tree-id="{{../../active_tree.id}}"
+												data-node-id="{{this.id}}"
+												{{#unless this.can_afford}}disabled{{/unless}}>
+												Unlock ({{this.cost}} {{#if (eq this.cost 1)}}point{{else}}points{{/if}})
+											</button>
+											{{/if}}
+										</div>
+									</div>
+									{{/each}}
+								</div>
+							</div>
+							{{/each}}
+						</div>
+						{{else}}
+						<div class="empty-banner info">
+							<i class="fas fa-project-diagram"></i>
+							<div class="banner-text">
+								<h4>Select a Perk Tree</h4>
+								<p>Choose a perk tree from the sidebar to view your progress.</p>
+							</div>
+						</div>
+						{{/if}}
+					</div>
+				</div>
+				{{else}}
+				<div class="empty-banner info">
+					<i class="fas fa-project-diagram"></i>
+					<div class="banner-text">
+						<h4>No Perk Trees Assigned</h4>
+						<p>You have not been assigned any perk trees by the Gamemaster.</p>
+					</div>
+				</div>
+				{{/if}}
+			{{else}}
+			<div class="empty-banner warning">
+				<i class="fas fa-hourglass-half"></i>
+				<div class="banner-text">
+					<h4>Downtime is currently inactive</h4>
+					<p>Wait for the Gamemaster to activate downtime mode to view or progress in perk trees.</p>
+				</div>
+			</div>
+			{{/if}}
+
+			{{else}}
+			<div class="empty-banner danger">
+				<i class="fas fa-user-slash"></i>
+				<div class="banner-text">
+					<h4>No Active Character</h4>
+					<p>Please select or assign a controlled character token to access perk trees.</p>
 				</div>
 			</div>
 			{{/if}}
@@ -241,29 +392,30 @@
 			<div class="gm-main-layout">
 				<div class="layout-sidebar">
 					<div class="section-title-row">
-						<h3 class="section-heading">Character Pools</h3>
+						<h3 class="section-heading">Characters</h3>
 						<button type="button" class="map-filter-btn {{#if only_show_on_map}}active{{/if}}" data-action="toggle-map-filter" title="Only show on map">
 							<i class="fas fa-map"></i>
 						</button>
 					</div>
+					<div class="sidebar-search" style="margin-bottom: 10px;">
+						<input type="text" id="yugen-downtime-actor-search" class="actor-search-input" placeholder="Search characters..." value="{{actor_search_query}}" style="background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.05); border-radius: 6px; color: #ffffff; padding: 6px 10px; width: 100%; font-size: 0.8rem; box-sizing: border-box;">
+					</div>
 					<div class="actors-feed">
 						{{#each actors}}
-						<div class="actor-feed-item">
+						<div class="actor-feed-item compact">
 							<div class="actor-row-main">
 								<img class="actor-avatar" src="{{this.img}}" alt="{{this.name}}">
-								<span class="actor-name">{{this.name}}</span>
-								<input type="number" class="actor-points-input" value="{{this.points}}" min="0" data-action="update-actor-points" data-actor-id="{{this.id}}" title="Current Downtime Points">
-							</div>
-							<div class="actor-row-rates">
-								<span class="rates-label">Rest gains (SR/LR):</span>
-								<div class="rates-inputs">
-									<input type="number" class="actor-rate-input" value="{{this.rest_short}}" min="0" data-action="update-actor-rate" data-rate-type="short" data-actor-id="{{this.id}}" title="Points gained on Short Rest">
-									<input type="number" class="actor-rate-input" value="{{this.rest_long}}" min="0" data-action="update-actor-rate" data-rate-type="long" data-actor-id="{{this.id}}" title="Points gained on Long Rest">
+								<div class="actor-details">
+									<span class="actor-name">{{this.name}}</span>
+									<span class="actor-points-label">{{this.points}} pts</span>
 								</div>
+								<button type="button" class="actor-edit-btn" data-action="edit-actor" data-actor-id="{{this.id}}" title="Edit Character Downtime Settings">
+									<i class="fas fa-edit"></i>
+								</button>
 							</div>
 						</div>
 						{{else}}
-						<div class="feed-empty">No character actors in the world.</div>
+						<div class="feed-empty">No character actors found.</div>
 						{{/each}}
 					</div>
 				</div>
@@ -276,6 +428,9 @@
 						</button>
 						<button type="button" class="sub-tab-item {{#if (eq sub_tab "recipes-config")}}active{{/if}}" data-action="sub-tab" data-tab="recipes-config">
 							<i class="fas fa-hammer"></i> Craft Recipes
+						</button>
+						<button type="button" class="sub-tab-item {{#if (eq sub_tab "perks-config")}}active{{/if}}" data-action="sub-tab" data-tab="perks-config">
+							<i class="fas fa-project-diagram"></i> Perk Trees
 						</button>
 					</div>
 
@@ -294,7 +449,7 @@
 								<div class="config-row-main">
 									<span class="config-row-name">{{this.name}}</span>
 									<div class="config-row-badges">
-										<span class="row-badge cost-badge">{{this.cost}} pts</span>
+										<span class="row-badge cost-badge">{{this.cost}} {{#if (eq this.cost 1)}}point{{else}}points{{/if}}</span>
 										{{#if this.roll_check}}
 										<span class="row-badge check-badge"><i class="fas fa-dice-d20"></i> {{this.roll_check}} {{#if this.dc}}(DC {{this.dc}}){{/if}}</span>
 										{{/if}}
@@ -334,7 +489,7 @@
 								<div class="config-row-main">
 									<span class="config-row-name">{{this.name}}</span>
 									<div class="config-row-badges">
-										<span class="row-badge cost-badge">{{this.dt_cost}} pts</span>
+										<span class="row-badge cost-badge">{{this.dt_cost}} {{#if (eq this.dt_cost 1)}}point{{else}}points{{/if}}</span>
 										{{#if this.output.uuid}}
 										<span class="row-badge output-badge">Produces: {{this.output.name}} (x{{this.output.quantity}})</span>
 										{{/if}}
@@ -352,6 +507,40 @@
 							</div>
 							{{else}}
 							<div class="feed-empty">No recipes configured yet. Click <strong>New Recipe</strong> to create one.</div>
+							{{/each}}
+						</div>
+					</div>
+					{{/if}}
+
+					{{#if (eq sub_tab "perks-config")}}
+					<div class="sub-tab-content active">
+						<div class="section-title-row">
+							<h3 class="section-heading">Perk Trees</h3>
+							<button type="button" class="action-btn outline-btn compact-btn" data-action="add-tree">
+								<i class="fas fa-plus"></i> New Tree
+							</button>
+						</div>
+
+						<div class="config-list">
+							{{#each perk_trees}}
+							<div class="config-row-item" data-tree-id="{{this.id}}">
+								<div class="config-row-main">
+									<span class="config-row-name">{{this.name}}</span>
+									<div class="config-row-badges">
+										<span class="row-badge perk-nodes-count-badge">Perks: {{this.nodes.length}}</span>
+									</div>
+								</div>
+								<div class="config-row-actions">
+									<button type="button" class="config-row-btn edit-btn" data-action="edit-tree" data-tree-id="{{this.id}}" title="Edit Perk Tree">
+										<i class="fas fa-edit"></i>
+									</button>
+									<button type="button" class="config-row-btn delete-btn" data-action="delete-tree" data-tree-id="{{this.id}}" title="Delete Perk Tree">
+										<i class="fas fa-trash-alt"></i>
+									</button>
+								</div>
+							</div>
+							{{else}}
+							<div class="feed-empty">No perk trees configured yet. Click <strong>New Tree</strong> to create one.</div>
 							{{/each}}
 						</div>
 					</div>

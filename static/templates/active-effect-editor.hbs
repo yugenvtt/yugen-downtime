@@ -1,0 +1,63 @@
+<div class="active-effect-editor-container">
+	<div class="editor-content">
+		<div class="form-group">
+			<label>Effect Name</label>
+			<div class="form-fields">
+				<input type="text" name="effect_name" value="{{effect.name}}" placeholder="Effect Name" required>
+			</div>
+		</div>
+
+		<div class="form-group">
+			<label>Effect Icon</label>
+			<div class="form-fields">
+				<input type="text" name="effect_img" value="{{effect.img}}" placeholder="icons/svg/aura.svg">
+				<button type="button" class="file-picker-btn" data-action="pick-effect-icon" title="Choose Icon">
+					<i class="fas fa-file-import"></i>
+				</button>
+			</div>
+		</div>
+
+		<div class="form-group stacked">
+			<label>Effect Description</label>
+			<div class="form-fields">
+				<textarea name="effect_description" placeholder="Describe the effect changes...">{{effect.description}}</textarea>
+			</div>
+		</div>
+
+		<div class="effect-changes-section">
+			<div class="changes-header">
+				<span>Attribute Modifiers</span>
+				<button type="button" class="action-btn outline-btn compact-btn" data-action="add-effect-change">
+					<i class="fas fa-plus"></i> Add Modifier
+				</button>
+			</div>
+			<div class="changes-list">
+				{{#each effect.changes}}
+				<div class="change-row" data-index="{{@index}}">
+					<input type="text" name="change_key_{{@index}}" value="{{this.key}}" placeholder="system.attributes.hp.max" class="change-key-input">
+					<select name="change_mode_{{@index}}" class="change-mode-select">
+						<option value="0" {{#if (eq this.mode 0)}}selected{{/if}}>CUSTOM</option>
+						<option value="1" {{#if (eq this.mode 1)}}selected{{/if}}>MULTIPLY</option>
+						<option value="2" {{#if (eq this.mode 2)}}selected{{/if}}>ADD</option>
+						<option value="3" {{#if (eq this.mode 3)}}selected{{/if}}>DOWNGRADE</option>
+						<option value="4" {{#if (eq this.mode 4)}}selected{{/if}}>UPGRADE</option>
+						<option value="5" {{#if (eq this.mode 5)}}selected{{/if}}>OVERRIDE</option>
+					</select>
+					<input type="text" name="change_value_{{@index}}" value="{{this.value}}" placeholder="value" class="change-value-input">
+					<button type="button" class="change-remove-btn" data-action="remove-effect-change" data-index="{{@index}}" title="Delete Modifier">
+						<i class="fas fa-trash-alt"></i>
+					</button>
+				</div>
+				{{else}}
+				<div class="feed-empty">No active effect modifiers added yet. Click <strong>Add Modifier</strong> to configure changes.</div>
+				{{/each}}
+			</div>
+		</div>
+	</div>
+
+	<footer class="sheet-footer">
+		<button type="button" data-action="save">
+			<i class="fas fa-save"></i> Save Effect
+		</button>
+	</footer>
+</div>
