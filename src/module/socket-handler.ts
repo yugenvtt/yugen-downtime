@@ -4,7 +4,7 @@
  **/
 
 import { MODULE_ID, FLAGS, SETTINGS } from './constants.js';
-import { get_flag, set_flag, log, debug } from './utils.js';
+import { get_flag, set_flag, log, debug, grant_items, get_roll_check_label } from './utils.js';
 import { CraftHandler } from './craft-handler.js';
 import { PerkTreeHandler } from './perk-tree-handler.js';
 
@@ -76,16 +76,17 @@ export class SocketHandler
 	/**
 	 * emits a craft request to the gm, or runs it directly if the user is a gm.
 	 **/
-	public static async emit_craft( actor_id: string, recipe_id: string ): Promise<void>
+	public static async emit_craft( actor_id: string, recipe_id: string, roll_result: any = null ): Promise<void>
 	{
 		const data =
 		{
 			action: 'craft-item',
 			actor_id,
-			recipe_id
+			recipe_id,
+			roll_result
 		};
 
-		console.log( `yugen-downtime | emit_craft triggered | actor_id: ${ actor_id } | recipe_id: ${ recipe_id } | isGM: ${ ( game as any ).user.isGM }` );
+		console.log( `yugen-downtime | emit_craft triggered | actor_id: ${ actor_id } | recipe_id: ${ recipe_id } | isGM: ${ ( game as any ).user.isGM } | roll_result:`, roll_result );
 
 		if ( ( game as any ).user.isGM )
 		{
@@ -187,63 +188,72 @@ export class SocketHandler
 
 		console.log( `yugen-downtime | successfully deducted ${ selected_action.cost } points from ${ actor.name } (remaining: ${ next_points })` );
 
-		/** execute macro (only on success) **/
-		if ( roll_success && ( selected_action.macro_id || selected_action.macro_name ) ) 
+		if ( roll_success )
 		{
-			/** lowercase purpose of the api call **/
-			const macro = ( game as any ).macros.get( selected_action.macro_id ) || 
-			              ( game as any ).macros.getName( selected_action.macro_name );
-
-			if ( macro ) 
+			/** grant awarded items/features **/
+			if ( selected_action.items && selected_action.items.length > 0 )
 			{
-				console.log( `yugen-downtime | executing macro on GM client: ${ macro.name }` );
+				await grant_items( actor, selected_action.items );
+			}
+
+			/** execute macro **/
+			if ( selected_action.macro_id || selected_action.macro_name ) 
+			{
+				/** lowercase purpose of the api call **/
+				const macro = ( game as any ).macros.get( selected_action.macro_id ) || 
+				              ( game as any ).macros.getName( selected_action.macro_name );
+
+				if ( macro ) 
+				{
+					console.log( `yugen-downtime | executing macro on GM client: ${ macro.name }` );
+					try 
+					{
+						/** execute macro with actor context **/
+						macro.execute( { actor } );
+					}
+					catch ( err ) 
+					{
+						console.error( `yugen-downtime | macro execution failed:`, err );
+					}
+				}
+				else 
+				{
+					console.warn( `yugen-downtime | macro not found: id=${ selected_action.macro_id }, name=${ selected_action.macro_name }` );
+				}
+			}
+
+			/** apply active effect **/
+			if ( selected_action.effect ) 
+			{
+				log( `applying action active effect to ${ actor.name }` );
 				try 
 				{
-					/** execute macro with actor context **/
-					macro.execute( { actor } );
+					const effect_data: any = 
+					{
+						name: selected_action.effect.name,
+						label: selected_action.effect.name,
+						img: selected_action.effect.img || 'icons/svg/aura.svg',
+						icon: selected_action.effect.img || 'icons/svg/aura.svg',
+						origin: `yugen-downtime`,
+						description: selected_action.effect.description,
+						disabled: false,
+						changes: selected_action.effect.changes.map( ( c: any ) => 
+						{
+							return {
+								key: c.key,
+								mode: Number( c.mode ),
+								value: c.value,
+								priority: 20
+							};
+						} )
+					};
+					/** create active effect document on actor **/
+					await actor.createEmbeddedDocuments( 'ActiveEffect', [ effect_data ] );
 				}
 				catch ( err ) 
 				{
-					console.error( `yugen-downtime | macro execution failed:`, err );
+					console.error( `${ MODULE_ID } | applying custom active effect failed:`, err );
 				}
-			}
-			else 
-			{
-				console.warn( `yugen-downtime | macro not found: id=${ selected_action.macro_id }, name=${ selected_action.macro_name }` );
-			}
-		}
-
-		/** apply active effect (only on success) **/
-		if ( roll_success && selected_action.effect ) 
-		{
-			log( `applying action active effect to ${ actor.name }` );
-			try 
-			{
-				const effect_data: any = 
-				{
-					name: selected_action.effect.name,
-					label: selected_action.effect.name,
-					img: selected_action.effect.img || 'icons/svg/aura.svg',
-					icon: selected_action.effect.img || 'icons/svg/aura.svg',
-					origin: `yugen-downtime`,
-					description: selected_action.effect.description,
-					disabled: false,
-					changes: selected_action.effect.changes.map( ( c: any ) => 
-					{
-						return {
-							key: c.key,
-							mode: Number( c.mode ),
-							value: c.value,
-							priority: 20
-						};
-					} )
-				};
-				/** create active effect document on actor **/
-				await actor.createEmbeddedDocuments( 'ActiveEffect', [ effect_data ] );
-			}
-			catch ( err ) 
-			{
-				console.error( `${ MODULE_ID } | applying custom active effect failed:`, err );
 			}
 		}
 
@@ -251,7 +261,7 @@ export class SocketHandler
 		let chat_content = '';
 		if ( data.roll_result ) 
 		{
-			const check_name = selected_action.roll_check.toUpperCase( );
+			const check_name = get_roll_check_label( selected_action.roll_check );
 			const success_text = roll_success ? 'SUCCESS' : 'FAILURE';
 			const success_color = roll_success ? '#10b981' : '#ef4444';
 			
@@ -313,14 +323,15 @@ export class SocketHandler
 	/**
 	 * emits a perk unlock request to the gm, or runs it directly if the user is a gm.
 	 **/
-	public static async emit_unlock_perk( actor_id: string, tree_id: string, node_id: string ): Promise<void>
+	public static async emit_unlock_perk( actor_id: string, tree_id: string, node_id: string, roll_result: any = null ): Promise<void>
 	{
 		const data =
 		{
 			action: 'unlock-perk',
 			actor_id,
 			tree_id,
-			node_id
+			node_id,
+			roll_result
 		};
 
 		if ( ( game as any ).user.isGM )

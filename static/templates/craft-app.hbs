@@ -34,6 +34,11 @@
 				<div class="craft-recipe-card {{#unless this.can_craft}}disabled{{/unless}}">
 					<div class="card-header-row">
 						<h3 class="card-title">{{this.name}}</h3>
+						{{#if this.roll_check}}
+						<span class="card-check-badge" style="font-size: 0.75rem; background: rgba(234, 179, 8, 0.2); color: #eab308; border: 1px solid rgba(234, 179, 8, 0.4); padding: 2px 6px; border-radius: 4px; font-weight: 600;">
+							{{this.roll_check_label}}{{#if this.dc}} (DC {{this.dc}}){{/if}}
+						</span>
+						{{/if}}
 						<span class="card-cost">{{this.dt_cost}} {{#if (eq this.dt_cost 1)}}point{{else}}points{{/if}}</span>
 					</div>
 

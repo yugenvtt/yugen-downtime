@@ -5,7 +5,7 @@
 
 import { MODULE_ID, SETTINGS } from './constants.js';
 import type { CraftRecipe, CraftIngredient } from './craft-handler.js';
-import { debug } from './utils.js';
+import { debug, get_roll_choices } from './utils.js';
 import { ActiveEffectEditor } from './active-effect-editor.js';
 
 const { ApplicationV2, HandlebarsApplicationMixin } = ( foundry.applications.api as any );
@@ -42,7 +42,7 @@ export class RecipeEditor extends ( HandlebarsApplicationMixin( ApplicationV2 ) 
 		position:
 		{
 			width: 600,
-			height: 580
+			height: 640
 		}
 	};
 
@@ -87,8 +87,12 @@ export class RecipeEditor extends ( HandlebarsApplicationMixin( ApplicationV2 ) 
 			},
 			macro_id: '',
 			macro_name: '',
+			roll_check: '',
+			dc: 0,
 			effect: null
 		};
+
+		const roll_choices = get_roll_choices( );
 
 		const macros = ( game as any ).macros.contents.map( ( m: any ) => 
 		{
@@ -100,6 +104,7 @@ export class RecipeEditor extends ( HandlebarsApplicationMixin( ApplicationV2 ) 
 
 		return {
 			recipe,
+			roll_choices,
 			has_effect: !!recipe.effect,
 			macros
 		};
@@ -197,6 +202,18 @@ export class RecipeEditor extends ( HandlebarsApplicationMixin( ApplicationV2 ) 
 			recipe.dt_cost = Math.max( 0, parseInt( cost_input.value ) || 0 );
 		}
 
+		const roll_select = el.querySelector( 'select[name="roll_check"]' ) as HTMLSelectElement;
+		if ( roll_select )
+		{
+			recipe.roll_check = roll_select.value || '';
+		}
+
+		const dc_input = el.querySelector( 'input[name="dc"]' ) as HTMLInputElement;
+		if ( dc_input )
+		{
+			recipe.dc = Math.max( 0, parseInt( dc_input.value ) || 0 );
+		}
+
 		const desc_textarea = el.querySelector( 'textarea[name="description"]' ) as HTMLTextAreaElement;
 		if ( desc_textarea )
 		{
@@ -216,7 +233,6 @@ export class RecipeEditor extends ( HandlebarsApplicationMixin( ApplicationV2 ) 
 			const macro = recipe.macro_id ? ( game as any ).macros.get( recipe.macro_id ) : null;
 			recipe.macro_name = macro ? macro.name : '';
 		}
-
 	}
 
 	private async _on_drop( event: any, slot: HTMLElement ): Promise<void>

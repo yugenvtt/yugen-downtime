@@ -42,12 +42,17 @@
 					<div class="card-meta">
 						{{#if this.roll_check}}
 						<div class="meta-badge check-badge">
-							<i class="fas fa-dice-d20"></i> {{this.roll_check}} {{#if this.dc}}(DC {{this.dc}}){{/if}}
+							<i class="fas fa-dice-d20"></i> {{this.roll_check_label}} {{#if this.dc}}(DC {{this.dc}}){{/if}}
 						</div>
 						{{/if}}
 						{{#if this.macro_name}}
 						<div class="meta-badge macro-badge">
 							<i class="fas fa-terminal"></i> {{this.macro_name}}
+						</div>
+						{{/if}}
+						{{#if this.items.length}}
+						<div class="meta-badge item-badge" style="background: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.4);">
+							<i class="fas fa-box-open"></i> {{this.items.length}} {{#if (eq this.items.length 1)}}item{{else}}items{{/if}}
 						</div>
 						{{/if}}
 					</div>
@@ -273,6 +278,12 @@
 													<span class="node-badge req-badge" title="Requires: {{this.req_list}}">
 														<i class="fas fa-lock"></i> Requires: {{this.req_list}}
 													</span>
+													{{/if}}
+													{{#if this.roll_check}}
+													<span class="node-badge check-badge" style="background: rgba(234, 179, 8, 0.2); color: #eab308; border: 1px solid rgba(234, 179, 8, 0.4);"><i class="fas fa-dice-d20"></i> {{this.roll_check_label}}{{#if this.dc}} (DC {{this.dc}}){{/if}}</span>
+													{{/if}}
+													{{#if this.items.length}}
+													<span class="node-badge items-badge" style="background: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.4);"><i class="fas fa-box-open"></i> {{this.items.length}} {{#if (eq this.items.length 1)}}item{{else}}items{{/if}}</span>
 													{{/if}}
 													{{#if this.macro_name}}
 													<span class="node-badge macro-badge"><i class="fas fa-terminal"></i> {{this.macro_name}}</span>

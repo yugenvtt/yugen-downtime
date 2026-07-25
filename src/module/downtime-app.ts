@@ -4,7 +4,7 @@
  **/
 
 import { MODULE_ID, FLAGS, SETTINGS } from './constants.js';
-import { get_flag, set_flag, log, debug } from './utils.js';
+import { get_flag, set_flag, log, debug, execute_roll_check, get_roll_check_label } from './utils.js';
 import { SocketHandler } from './socket-handler.js';
 import type { CraftRecipe, CraftIngredient } from './craft-handler.js';
 import { DowntimeLogsApp } from './downtime-logs-app.js';
@@ -261,6 +261,7 @@ export class DowntimeApp extends ( HandlebarsApplicationMixin( ApplicationV2 ) a
 		{
 			return {
 				...action,
+				roll_check_label: get_roll_check_label( action.roll_check ),
 				can_afford: player_points >= action.cost
 			};
 		} );
@@ -307,6 +308,7 @@ export class DowntimeApp extends ( HandlebarsApplicationMixin( ApplicationV2 ) a
 
 				return {
 					...n,
+					roll_check_label: get_roll_check_label( n.roll_check ),
 					is_unlocked,
 					is_locked,
 					is_available,
@@ -466,6 +468,7 @@ export class DowntimeApp extends ( HandlebarsApplicationMixin( ApplicationV2 ) a
 			const formatted_time = `${ d.toLocaleDateString( ) } ${ d.toLocaleTimeString( ) }`;
 			return {
 				...log_entry,
+				roll_check_label: get_roll_check_label( log_entry.roll_check ),
 				formatted_time
 			};
 		} );
@@ -496,6 +499,7 @@ export class DowntimeApp extends ( HandlebarsApplicationMixin( ApplicationV2 ) a
 
 			return {
 				...recipe,
+				roll_check_label: get_roll_check_label( recipe.roll_check ),
 				ingredients: ingredients_with_status,
 				can_craft
 			};
@@ -870,79 +874,18 @@ export class DowntimeApp extends ( HandlebarsApplicationMixin( ApplicationV2 ) a
 				return;
 			}
 
-			const abilities =
-			[
-				'str',
-				'dex',
-				'con',
-				'int',
-				'wis',
-				'cha'
-			];
-			let roll = null;
-
-			try
-			{
-				if ( abilities.includes( action.roll_check ) )
-				{
-					/** lowercase purpose of the api call **/
-					roll = await actor.rollAbilityCheck( { ability: action.roll_check } );
-				}
-				else
-				{
-					/** lowercase purpose of the api call **/
-					roll = await actor.rollSkill( { skill: action.roll_check } );
-				}
-			}
-			catch ( err )
-			{
-				console.error( `${ MODULE_ID } | roll execution failed:`, err );
-				return;
-			}
-
-			if ( !roll )
+			const roll_eval = await execute_roll_check( actor, action.roll_check );
+			if ( !roll_eval )
 			{
 				return;
 			}
-
-			let actual_roll = roll;
-			if ( Array.isArray( roll ) )
-			{
-				actual_roll = roll[ 0 ];
-			}
-			else if ( roll && typeof roll === 'object' && roll.rolls && Array.isArray( roll.rolls ) )
-			{
-				actual_roll = roll.rolls[ 0 ];
-			}
-
-			if ( !actual_roll )
-			{
-				return;
-			}
-
-			/** ensure the roll is evaluated **/
-			const is_evaluated = actual_roll.evaluated || actual_roll._evaluated || typeof actual_roll.total === 'number';
-			if ( !is_evaluated && typeof actual_roll.evaluateSync === 'function' )
-			{
-				try
-				{
-					actual_roll.evaluateSync( );
-				}
-				catch ( e )
-				{
-					console.error( `${ MODULE_ID } | failed to evaluate roll synchronously:`, e );
-				}
-			}
-
-			const roll_total = typeof actual_roll.total !== 'undefined' ? actual_roll.total : ( typeof actual_roll._total !== 'undefined' ? actual_roll._total : 0 );
-			const roll_formula = actual_roll.formula || '';
 
 			roll_result =
 			{
-				total: roll_total,
-				formula: roll_formula,
+				total: roll_eval.total,
+				formula: roll_eval.roll?.formula || '',
 				dc: action.dc || 0,
-				success: action.dc ? roll_total >= action.dc : true
+				success: action.dc ? roll_eval.total >= action.dc : true
 			};
 		}
 
@@ -1470,7 +1413,36 @@ export class DowntimeApp extends ( HandlebarsApplicationMixin( ApplicationV2 ) a
 			return;
 		}
 
-		await SocketHandler.emit_unlock_perk( actor_id, tree_id, node_id );
+		/** check if node requires a roll check **/
+		const trees: any[] = ( game as any ).settings.get( MODULE_ID, SETTINGS.PERK_TREES ) || [ ];
+		const tree = trees.find( ( t: any ) => t.id === tree_id );
+		const node = tree?.nodes?.find( ( n: any ) => n.id === node_id );
+
+		let roll_result = null;
+		if ( node?.roll_check )
+		{
+			const actor = ( game as any ).actors.get( actor_id );
+			if ( !actor )
+			{
+				return;
+			}
+
+			const roll_eval = await execute_roll_check( actor, node.roll_check );
+			if ( !roll_eval )
+			{
+				return;
+			}
+
+			roll_result =
+			{
+				total: roll_eval.total,
+				formula: roll_eval.roll?.formula || '',
+				dc: node.dc || 0,
+				success: node.dc ? roll_eval.total >= node.dc : true
+			};
+		}
+
+		await SocketHandler.emit_unlock_perk( actor_id, tree_id, node_id, roll_result );
 	}
 
 	/**

@@ -4,7 +4,7 @@
  **/
 
 import { MODULE_ID, SETTINGS } from './constants.js';
-import { log, debug } from './utils.js';
+import { log, debug, get_roll_check_label } from './utils.js';
 
 const { ApplicationV2, HandlebarsApplicationMixin } = ( foundry.applications.api as any );
 
@@ -98,6 +98,7 @@ export class DowntimeLogsApp extends ( HandlebarsApplicationMixin( ApplicationV2
 			const d = new Date( log_entry.timestamp );
 			return {
 				...log_entry,
+				roll_check_label: get_roll_check_label( log_entry.roll_check ),
 				formatted_time: `${ d.toLocaleDateString( ) } ${ d.toLocaleTimeString( ) }`
 			};
 		} );

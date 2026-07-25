@@ -1,6 +1,6 @@
 {
   "name": "yugen-downtime",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Downtime action, crafting manager and perk tree system for players to invest downtime points into.",
   "main": "index.js",
   "type": "module",

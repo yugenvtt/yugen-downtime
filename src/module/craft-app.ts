@@ -6,7 +6,7 @@
  **/
 
 import { MODULE_ID, FLAGS, SETTINGS } from './constants.js';
-import { get_flag, log, debug } from './utils.js';
+import { get_flag, log, debug, execute_roll_check, get_roll_check_label } from './utils.js';
 import { SocketHandler } from './socket-handler.js';
 import type { CraftRecipe, CraftIngredient } from './craft-handler.js';
 
@@ -196,6 +196,7 @@ export class CraftApp extends ( HandlebarsApplicationMixin( ApplicationV2 ) as a
 
 			return {
 				...recipe,
+				roll_check_label: get_roll_check_label( recipe.roll_check ),
 				ingredients: ingredients_with_status,
 				can_craft
 			};
@@ -462,7 +463,35 @@ export class CraftApp extends ( HandlebarsApplicationMixin( ApplicationV2 ) as a
 			return;
 		}
 
-		await SocketHandler.emit_craft( actor_id, recipe_id );
+		/** check if recipe requires a roll check **/
+		const recipes: CraftRecipe[] = ( game as any ).settings.get( MODULE_ID, SETTINGS.RECIPES ) || [ ];
+		const recipe = recipes.find( ( r ) => r.id === recipe_id );
+
+		let roll_result = null;
+		if ( recipe?.roll_check )
+		{
+			const actor = ( game as any ).actors.get( actor_id );
+			if ( !actor )
+			{
+				return;
+			}
+
+			const roll_eval = await execute_roll_check( actor, recipe.roll_check );
+			if ( !roll_eval )
+			{
+				return;
+			}
+
+			roll_result =
+			{
+				total: roll_eval.total,
+				formula: roll_eval.roll?.formula || '',
+				dc: recipe.dc || 0,
+				success: recipe.dc ? roll_eval.total >= recipe.dc : true
+			};
+		}
+
+		await SocketHandler.emit_craft( actor_id, recipe_id, roll_result );
 	}
 
 	/**

@@ -4,7 +4,7 @@
  **/
 
 import { MODULE_ID, FLAGS, SETTINGS } from './constants.js';
-import { get_flag, set_flag, log, debug } from './utils.js';
+import { get_flag, set_flag, log, debug, get_roll_check_label } from './utils.js';
 
 export interface CraftIngredient
 {
@@ -24,6 +24,8 @@ export interface CraftRecipe
 	output: CraftIngredient;
 	macro_id?: string;
 	macro_name?: string;
+	roll_check?: string;
+	dc?: number;
 	effect?: {
 		name: string;
 		img: string;
@@ -91,6 +93,13 @@ export class CraftHandler
 			return;
 		}
 
+		/** evaluate roll success **/
+		let roll_success = true;
+		if ( data.roll_result )
+		{
+			roll_success = data.roll_result.success;
+		}
+
 		/** consume ingredients **/
 		await CraftHandler._consume_ingredients( actor, recipe.ingredients );
 
@@ -100,59 +109,88 @@ export class CraftHandler
 		await set_flag( actor, FLAGS.POINTS, next_points );
 		log( `deducted ${ recipe.dt_cost } dt points from ${ actor.name } for crafting ${ recipe.output.name }` );
 
-		/** produce output item **/
-		await CraftHandler._produce_output( actor, recipe.output );
-
-		/** execute macro **/
-		if ( recipe.macro_id || recipe.macro_name )
+		if ( roll_success )
 		{
-			const macro = ( game as any ).macros.get( recipe.macro_id ) || 
-			              ( game as any ).macros.getName( recipe.macro_name );
-			if ( macro )
+			/** produce output item **/
+			await CraftHandler._produce_output( actor, recipe.output );
+
+			/** execute macro **/
+			if ( recipe.macro_id || recipe.macro_name )
 			{
-				log( `executing recipe macro: ${ macro.name }` );
+				const macro = ( game as any ).macros.get( recipe.macro_id ) || 
+				              ( game as any ).macros.getName( recipe.macro_name );
+				if ( macro )
+				{
+					log( `executing recipe macro: ${ macro.name }` );
+					try
+					{
+						macro.execute( { actor } );
+					}
+					catch ( err )
+					{
+						console.error( `${ MODULE_ID } | recipe macro execution failed:`, err );
+					}
+				}
+			}
+
+			/** apply custom active effect **/
+			if ( recipe.effect )
+			{
+				log( `applying custom active effect to ${ actor.name }` );
 				try
 				{
-					macro.execute( { actor } );
+					const effect_data: any = {
+						name: recipe.effect.name,
+						label: recipe.effect.name,
+						img: recipe.effect.img || 'icons/svg/aura.svg',
+						icon: recipe.effect.img || 'icons/svg/aura.svg',
+						origin: `yugen-downtime`,
+						description: recipe.effect.description,
+						disabled: false,
+						changes: recipe.effect.changes.map( ( c ) => ( {
+							key: c.key,
+							mode: Number( c.mode ),
+							value: c.value,
+							priority: 20
+						} ) )
+					};
+					await actor.createEmbeddedDocuments( 'ActiveEffect', [ effect_data ] );
 				}
 				catch ( err )
 				{
-					console.error( `${ MODULE_ID } | recipe macro execution failed:`, err );
+					console.error( `${ MODULE_ID } | applying custom active effect failed:`, err );
 				}
-			}
-		}
-
-		/** apply custom active effect **/
-		if ( recipe.effect )
-		{
-			log( `applying custom active effect to ${ actor.name }` );
-			try
-			{
-				const effect_data: any = {
-					name: recipe.effect.name,
-					label: recipe.effect.name,
-					img: recipe.effect.img || 'icons/svg/aura.svg',
-					icon: recipe.effect.img || 'icons/svg/aura.svg',
-					origin: `yugen-downtime`,
-					description: recipe.effect.description,
-					disabled: false,
-					changes: recipe.effect.changes.map( ( c ) => ( {
-						key: c.key,
-						mode: Number( c.mode ),
-						value: c.value,
-						priority: 20
-					} ) )
-				};
-				await actor.createEmbeddedDocuments( 'ActiveEffect', [ effect_data ] );
-			}
-			catch ( err )
-			{
-				console.error( `${ MODULE_ID } | applying custom active effect failed:`, err );
 			}
 		}
 
 		/** send chat notification **/
-		const chat_content = `<div class="downtime-chat-card craft-chat-card">
+		let chat_content = '';
+		if ( data.roll_result )
+		{
+			const check_name = get_roll_check_label( recipe.roll_check || '' );
+			const success_text = roll_success ? 'SUCCESS' : 'FAILURE';
+			const success_color = roll_success ? '#10b981' : '#ef4444';
+
+			chat_content = `<div class="downtime-chat-card craft-chat-card">
+	<p><strong>${ ( globalThis as any ).yugen_utils.escape_html( actor.name ) }</strong> spent <strong>${ recipe.dt_cost }</strong> downtime points to craft: <strong>${ ( globalThis as any ).yugen_utils.escape_html( recipe.name ) }</strong></p>
+	<div class="roll-result-box" style="border-left: 4px solid ${ success_color }; padding-left: 8px; margin: 8px 0;">
+		<span style="font-weight: 600;">Check:</span> ${ check_name }<br/>
+		<span style="font-weight: 600;">Roll Total:</span> ${ data.roll_result.total }<br/>
+		${ recipe.dc ? `<span style="font-weight: 600;">DC:</span> ${ recipe.dc }<br/>` : '' }
+		<span style="color: ${ success_color }; font-weight: bold;">Result: ${ success_text }</span>
+	</div>
+	${ roll_success ? `<div class="craft-result-row">
+		<img src="${ recipe.output.img }" alt="${ ( globalThis as any ).yugen_utils.escape_html( recipe.output.name ) }" class="craft-output-img">
+		<div class="craft-result-info">
+			<span class="craft-result-label">Obtained</span>
+			<span class="craft-result-name">${ ( globalThis as any ).yugen_utils.escape_html( recipe.output.name ) } x${ recipe.output.quantity }</span>
+		</div>
+	</div>` : '<p style="font-size: 0.95rem; color: #a1a1aa;">Crafting failed! Ingredients and downtime points were spent.</p>' }
+</div>`;
+		}
+		else
+		{
+			chat_content = `<div class="downtime-chat-card craft-chat-card">
 	<p><strong>${ ( globalThis as any ).yugen_utils.escape_html( actor.name ) }</strong> spent <strong>${ recipe.dt_cost }</strong> downtime points to craft: <strong>${ ( globalThis as any ).yugen_utils.escape_html( recipe.output.name ) }</strong></p>
 	<div class="craft-result-row">
 		<img src="${ recipe.output.img }" alt="${ ( globalThis as any ).yugen_utils.escape_html( recipe.output.name ) }" class="craft-output-img">
@@ -162,6 +200,7 @@ export class CraftHandler
 		</div>
 	</div>
 </div>`;
+		}
 
 		/** lowercase purpose of the api call **/
 		await ( ChatMessage as any ).create(

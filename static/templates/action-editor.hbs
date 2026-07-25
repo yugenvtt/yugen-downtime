@@ -31,9 +31,22 @@
 			<label>Roll Check</label>
 			<div class="form-fields">
 				<select name="roll_check">
-					{{#each roll_choices}}
-					<option value="{{this.id}}" {{#if (eq this.id ../action.roll_check)}}selected{{/if}}>{{this.name}}</option>
-					{{/each}}
+					<option value="">None</option>
+					<optgroup label="Abilities (Stats)">
+						{{#each roll_choices.abilities}}
+						<option value="{{this.id}}" {{#if (eq this.id ../action.roll_check)}}selected{{/if}}>{{this.name}}</option>
+						{{/each}}
+					</optgroup>
+					<optgroup label="Skills">
+						{{#each roll_choices.skills}}
+						<option value="{{this.id}}" {{#if (eq this.id ../action.roll_check)}}selected{{/if}}>{{this.name}}</option>
+						{{/each}}
+					</optgroup>
+					<optgroup label="Tools">
+						{{#each roll_choices.tools}}
+						<option value="{{this.id}}" {{#if (eq this.id ../action.roll_check)}}selected{{/if}}>{{this.name}}</option>
+						{{/each}}
+					</optgroup>
 				</select>
 			</div>
 		</div>
@@ -62,6 +75,33 @@
 				<button type="button" class="effect-control-btn" data-action="create-effect" style="flex: 1 !important; width: auto !important;">
 					<i class="fas fa-plus"></i> Configure Active Effect
 				</button>
+				{{/if}}
+			</div>
+		</div>
+
+		<div class="form-group stacked">
+			<label>Awarded Items / Features</label>
+			<div class="drop-slot action-items-slot" style="min-height: 54px; padding: 8px; border: 1px dashed rgba(255,255,255,0.2); border-radius: 4px; background: rgba(0,0,0,0.2);">
+				{{#if action.items.length}}
+				<div class="craft-slot-items" style="display: flex; flex-direction: column; gap: 4px;">
+					{{#each action.items}}
+					<div class="craft-slot-item" style="display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.05); padding: 4px 8px; border-radius: 4px;">
+						<img class="craft-ing-img" src="{{this.img}}" alt="{{this.name}}" style="width: 24px; height: 24px; border: none; border-radius: 3px;">
+						<span class="craft-ing-name" style="flex: 1; font-size: 0.85rem; font-weight: 600; color: #f4f4f5;">{{this.name}}</span>
+						<input type="number" class="craft-qty-input" value="{{this.quantity}}" min="1" style="width: 50px; text-align: center; height: 24px; font-size: 0.8rem;"
+							data-action="edit-item-qty"
+							data-item-uuid="{{this.uuid}}">
+						<button type="button" class="craft-remove-btn" data-action="remove-item" data-item-uuid="{{this.uuid}}" style="border: none; background: transparent; color: #ef4444; cursor: pointer; padding: 2px 6px;">
+							<i class="fas fa-times"></i>
+						</button>
+					</div>
+					{{/each}}
+				</div>
+				{{else}}
+				<div class="craft-drop-hint" style="display: flex; align-items: center; justify-content: center; gap: 6px; color: #71717a; font-size: 0.8rem; padding: 8px 0;">
+					<i class="fas fa-plus-circle"></i>
+					<span>Drop items or features here to grant on completion</span>
+				</div>
 				{{/if}}
 			</div>
 		</div>

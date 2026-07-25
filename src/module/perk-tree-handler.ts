@@ -1,10 +1,5 @@
-/**
- * @file src/module/perk-tree-handler.ts
- * gm-side execution logic for perk tree unlocks.
- **/
-
 import { MODULE_ID, FLAGS, SETTINGS } from './constants.js';
-import { get_flag, set_flag, log, debug } from './utils.js';
+import { get_flag, set_flag, log, debug, grant_items, get_roll_check_label } from './utils.js';
 
 export interface PerkNode
 {
@@ -16,6 +11,9 @@ export interface PerkNode
 	requirements: string[];
 	macro_id: string;
 	macro_name: string;
+	roll_check?: string;
+	dc?: number;
+	items?: any[];
 	effect: {
 		name: string;
 		img: string;
@@ -111,80 +109,122 @@ export class PerkTreeHandler
 			return;
 		}
 
+		/** evaluate roll success **/
+		let roll_success = true;
+		if ( data.roll_result )
+		{
+			roll_success = data.roll_result.success;
+		}
+
 		/** deduct downtime points **/
 		const next_points = current_points - node.cost;
 		await set_flag( actor, FLAGS.POINTS, next_points );
 		log( `deducted ${ node.cost } dt points from ${ actor.name } for unlocking ${ node.name }` );
 
-		/** update unlocked perks in actor flag **/
-		tree_progress.unlocked_nodes.push( node.id );
-		progress[ tree.id ] = tree_progress;
-		await set_flag( actor, FLAGS.PERK_TREES, progress );
-		log( `recorded perk ${ node.name } unlock for ${ actor.name }` );
-
-		/** execute macro **/
-		if ( node.macro_id || node.macro_name )
+		if ( roll_success )
 		{
-			/** lowercase purpose of the api call **/
-			const macro = ( game as any ).macros.get( node.macro_id ) || 
-			              ( game as any ).macros.getName( node.macro_name );
+			/** update unlocked perks in actor flag **/
+			tree_progress.unlocked_nodes.push( node.id );
+			progress[ tree.id ] = tree_progress;
+			await set_flag( actor, FLAGS.PERK_TREES, progress );
+			log( `recorded perk ${ node.name } unlock for ${ actor.name }` );
 
-			if ( macro )
+			/** grant awarded items/features **/
+			if ( node.items && node.items.length > 0 )
 			{
-				log( `executing perk macro: ${ macro.name }` );
+				await grant_items( actor, node.items );
+			}
+
+			/** execute macro **/
+			if ( node.macro_id || node.macro_name )
+			{
+				/** lowercase purpose of the api call **/
+				const macro = ( game as any ).macros.get( node.macro_id ) || 
+				              ( game as any ).macros.getName( node.macro_name );
+
+				if ( macro )
+				{
+					log( `executing perk macro: ${ macro.name }` );
+					try
+					{
+						macro.execute( { actor } );
+					}
+					catch ( err )
+					{
+						console.error( `${ MODULE_ID } | perk macro execution failed:`, err );
+					}
+				}
+			}
+
+			/** apply active effect **/
+			if ( node.effect )
+			{
+				log( `applying perk active effect to ${ actor.name }` );
 				try
 				{
-					macro.execute( { actor } );
+					const effect_data: any = 
+					{
+						name: node.effect.name,
+						label: node.effect.name,
+						img: node.effect.img || 'icons/svg/aura.svg',
+						icon: node.effect.img || 'icons/svg/aura.svg',
+						origin: `yugen-downtime`,
+						description: node.effect.description,
+						disabled: false,
+						flags:
+						{
+							[ MODULE_ID ]:
+							{
+								node_id: node.id
+							}
+						},
+						changes: node.effect.changes.map( ( c ) => 
+						{
+							return {
+								key: c.key,
+								mode: Number( c.mode ),
+								value: c.value,
+								priority: 20
+							};
+						} )
+					};
+					await actor.createEmbeddedDocuments( 'ActiveEffect', [ effect_data ] );
 				}
 				catch ( err )
 				{
-					console.error( `${ MODULE_ID } | perk macro execution failed:`, err );
+					console.error( `${ MODULE_ID } | applying custom active effect failed:`, err );
 				}
-			}
-		}
-
-		/** apply active effect **/
-		if ( node.effect )
-		{
-			log( `applying perk active effect to ${ actor.name }` );
-			try
-			{
-				const effect_data: any = 
-				{
-					name: node.effect.name,
-					label: node.effect.name,
-					img: node.effect.img || 'icons/svg/aura.svg',
-					icon: node.effect.img || 'icons/svg/aura.svg',
-					origin: `yugen-downtime`,
-					description: node.effect.description,
-					disabled: false,
-					flags:
-					{
-						[ MODULE_ID ]:
-						{
-							node_id: node.id
-						}
-					},
-					changes: node.effect.changes.map( ( c ) => 
-					{
-						return {
-							key: c.key,
-							mode: Number( c.mode ),
-							value: c.value,
-							priority: 20
-						};
-					} )
-				};
-				await actor.createEmbeddedDocuments( 'ActiveEffect', [ effect_data ] );
-			}
-			catch ( err )
-			{
-				console.error( `${ MODULE_ID } | applying custom active effect failed:`, err );
 			}
 		}
 
 		/** send chat notification **/
-		const chat_content = `<div class="downtime-chat-card perk-chat-card">
+		let chat_content = '';
+		if ( data.roll_result )
+		{
+			const check_name = get_roll_check_label( node.roll_check || '' );
+			const success_text = roll_success ? 'SUCCESS' : 'FAILURE';
+			const success_color = roll_success ? '#10b981' : '#ef4444';
+
+			chat_content = `<div class="downtime-chat-card perk-chat-card">
+	<p><strong>${ ( globalThis as any ).yugen_utils.escape_html( actor.name ) }</strong> spent <strong>${ node.cost }</strong> downtime points to unlock: <strong>${ ( globalThis as any ).yugen_utils.escape_html( node.name ) }</strong></p>
+	<div class="roll-result-box" style="border-left: 4px solid ${ success_color }; padding-left: 8px; margin: 8px 0;">
+		<span style="font-weight: 600;">Check:</span> ${ check_name }<br/>
+		<span style="font-weight: 600;">Roll Total:</span> ${ data.roll_result.total }<br/>
+		${ node.dc ? `<span style="font-weight: 600;">DC:</span> ${ node.dc }<br/>` : '' }
+		<span style="color: ${ success_color }; font-weight: bold;">Result: ${ success_text }</span>
+	</div>
+	${ roll_success ? `<div class="perk-result-row" style="display: flex; align-items: center; gap: 8px; margin: 8px 0; background: rgba(255,255,255,0.05); padding: 8px; border-radius: 4px; border-left: 4px solid #eab308;">
+		<img src="${ node.icon }" alt="${ ( globalThis as any ).yugen_utils.escape_html( node.name ) }" style="width: 36px; height: 36px; border: none; border-radius: 4px;">
+		<div style="display: flex; flex-direction: column;">
+			<span style="font-size: 0.75rem; color: #a1a1aa; text-transform: uppercase; font-weight: 600;">Perk Unlocked</span>
+			<span style="font-weight: bold; color: #fff;">${ ( globalThis as any ).yugen_utils.escape_html( node.name ) }</span>
+		</div>
+	</div>` : '<p style="font-size: 0.95rem; color: #a1a1aa;">Perk unlock failed! Points were spent.</p>' }
+</div>`;
+		}
+		else
+		{
+			chat_content = `<div class="downtime-chat-card perk-chat-card">
 	<p><strong>${ ( globalThis as any ).yugen_utils.escape_html( actor.name ) }</strong> spent <strong>${ node.cost }</strong> downtime points to unlock: <strong>${ ( globalThis as any ).yugen_utils.escape_html( node.name ) }</strong></p>
 	<div class="perk-result-row" style="display: flex; align-items: center; gap: 8px; margin: 8px 0; background: rgba(255,255,255,0.05); padding: 8px; border-radius: 4px; border-left: 4px solid #eab308;">
 		<img src="${ node.icon }" alt="${ ( globalThis as any ).yugen_utils.escape_html( node.name ) }" style="width: 36px; height: 36px; border: none; border-radius: 4px;">
@@ -194,6 +234,7 @@ export class PerkTreeHandler
 		</div>
 	</div>
 </div>`;
+		}
 
 		/** lowercase purpose of the api call **/
 		await ( ChatMessage as any ).create(
@@ -214,10 +255,10 @@ export class PerkTreeHandler
 			actor_name: actor.name,
 			action_name: `Unlocked Perk: ${ node.name }`,
 			cost: node.cost,
-			roll_check: '',
-			roll_total: null,
-			dc: 0,
-			roll_success: true
+			roll_check: node.roll_check || '',
+			roll_total: data.roll_result ? data.roll_result.total : null,
+			dc: node.dc || 0,
+			roll_success: roll_success
 		};
 		current_logs.unshift( new_log );
 		if ( current_logs.length > 100 ) 

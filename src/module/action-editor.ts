@@ -4,6 +4,7 @@
  **/
 
 import { MODULE_ID, SETTINGS } from './constants.js';
+import { get_roll_choices, debug } from './utils.js';
 import { ActiveEffectEditor } from './active-effect-editor.js';
 
 const { ApplicationV2, HandlebarsApplicationMixin } = ( foundry.applications.api as any );
@@ -36,8 +37,14 @@ export class ActionEditor extends ( HandlebarsApplicationMixin( ApplicationV2 ) 
 			macro_name: '',
 			roll_check: '',
 			dc: 0,
-			effect: null
+			effect: null,
+			items: [ ]
 		};
+
+		if ( !this.action_data.items )
+		{
+			this.action_data.items = [ ];
+		}
 	}
 
 	static DEFAULT_OPTIONS =
@@ -59,8 +66,8 @@ export class ActionEditor extends ( HandlebarsApplicationMixin( ApplicationV2 ) 
 		},
 		position:
 		{
-			width: 520,
-			height: 600
+			width: 540,
+			height: 680
 		}
 	};
 
@@ -77,39 +84,14 @@ export class ActionEditor extends ( HandlebarsApplicationMixin( ApplicationV2 ) 
 		save: ActionEditor._on_save,
 		'create-effect': ActionEditor._on_create_effect,
 		'edit-effect': ActionEditor._on_edit_effect,
-		'remove-effect': ActionEditor._on_remove_effect
+		'remove-effect': ActionEditor._on_remove_effect,
+		'remove-item': ActionEditor._on_remove_item,
+		'edit-item-qty': ActionEditor._on_edit_item_qty
 	};
 
 	async _prepareContext( _options: any )
 	{
-		const roll_choices =
-		[
-			{ id: '', name: 'None' },
-			{ id: 'str', name: 'Strength' },
-			{ id: 'dex', name: 'Dexterity' },
-			{ id: 'con', name: 'Constitution' },
-			{ id: 'int', name: 'Intelligence' },
-			{ id: 'wis', name: 'Wisdom' },
-			{ id: 'cha', name: 'Charisma' },
-			{ id: 'ath', name: 'Athletics' },
-			{ id: 'acr', name: 'Acrobatics' },
-			{ id: 'slh', name: 'Sleight of Hand' },
-			{ id: 'ste', name: 'Stealth' },
-			{ id: 'arc', name: 'Arcana' },
-			{ id: 'his', name: 'History' },
-			{ id: 'inv', name: 'Investigation' },
-			{ id: 'nat', name: 'Nature' },
-			{ id: 'rel', name: 'Religion' },
-			{ id: 'ani', name: 'Animal Handling' },
-			{ id: 'ins', name: 'Insight' },
-			{ id: 'med', name: 'Medicine' },
-			{ id: 'prc', name: 'Perception' },
-			{ id: 'sur', name: 'Survival' },
-			{ id: 'dec', name: 'Deception' },
-			{ id: 'itm', name: 'Intimidation' },
-			{ id: 'prf', name: 'Performance' },
-			{ id: 'per', name: 'Persuasion' }
-		];
+		const roll_choices = get_roll_choices( );
 
 		const macros = ( game as any ).macros.contents.map( ( m: any ) =>
 		{
@@ -131,6 +113,15 @@ export class ActionEditor extends ( HandlebarsApplicationMixin( ApplicationV2 ) 
 		this.element.addEventListener( 'click', ( event: any ) =>
 		{
 			const target = event.target.closest( '[data-action]' );
+			if ( target && ![ 'INPUT', 'SELECT', 'TEXTAREA' ].includes( target.tagName ) )
+			{
+				this._onAction( event, target );
+			}
+		} );
+
+		this.element.addEventListener( 'change', ( event: any ) =>
+		{
+			const target = event.target.closest( '[data-action]' );
 			if ( target )
 			{
 				this._onAction( event, target );
@@ -140,6 +131,37 @@ export class ActionEditor extends ( HandlebarsApplicationMixin( ApplicationV2 ) 
 		this.element.addEventListener( 'submit', ( event: Event ) =>
 		{
 			event.preventDefault( );
+		} );
+
+		/** drag and drop support for awarded items **/
+		this.element.addEventListener( 'dragover', ( event: any ) =>
+		{
+			const slot = event.target.closest( '.drop-slot' );
+			if ( slot )
+			{
+				event.preventDefault( );
+				slot.classList.add( 'drag-over' );
+			}
+		} );
+
+		this.element.addEventListener( 'dragleave', ( event: any ) =>
+		{
+			const slot = event.target.closest( '.drop-slot' );
+			if ( slot )
+			{
+				slot.classList.remove( 'drag-over' );
+			}
+		} );
+
+		this.element.addEventListener( 'drop', ( event: any ) =>
+		{
+			const slot = event.target.closest( '.drop-slot' );
+			if ( slot )
+			{
+				event.preventDefault( );
+				slot.classList.remove( 'drag-over' );
+				this._on_drop( event, slot );
+			}
 		} );
 	}
 
@@ -170,6 +192,84 @@ export class ActionEditor extends ( HandlebarsApplicationMixin( ApplicationV2 ) 
 
 		const macro = this.action_data.macro_id ? ( game as any ).macros.get( this.action_data.macro_id ) : null;
 		this.action_data.macro_name = macro ? macro.name : '';
+	}
+
+	private async _on_drop( event: any, _slot: HTMLElement ): Promise<void>
+	{
+		let drop_data: any = null;
+		try
+		{
+			drop_data = JSON.parse( event.dataTransfer.getData( 'text/plain' ) );
+		}
+		catch ( e )
+		{
+			return;
+		}
+
+		if ( !drop_data || drop_data.type !== 'Item' )
+		{
+			return;
+		}
+
+		let item: any = null;
+		try
+		{
+			item = await ( fromUuid as any )( drop_data.uuid );
+		}
+		catch ( e )
+		{
+			debug( `could not resolve dropped item uuid ${ drop_data.uuid }` );
+			return;
+		}
+
+		if ( !item )
+		{
+			return;
+		}
+
+		this._sync_form_to_data( );
+
+		const item_entry: any =
+		{
+			uuid: drop_data.uuid,
+			name: item.name,
+			img: item.img || 'icons/svg/item-bag.svg',
+			quantity: 1,
+			item_data: typeof item.toObject === 'function' ? item.toObject( ) : ( foundry.utils as any ).duplicate( item )
+		};
+
+		const existing_idx = this.action_data.items.findIndex( ( i: any ) => i.uuid === item_entry.uuid );
+		if ( existing_idx >= 0 )
+		{
+			this.action_data.items[ existing_idx ].quantity += 1;
+		}
+		else
+		{
+			this.action_data.items.push( item_entry );
+		}
+
+		this.render( );
+	}
+
+	private static _on_remove_item( this: ActionEditor, event: any, target: HTMLButtonElement )
+	{
+		event.preventDefault( );
+		const item_uuid = target.dataset.itemUuid || '';
+		this._sync_form_to_data( );
+		this.action_data.items = this.action_data.items.filter( ( i: any ) => i.uuid !== item_uuid );
+		this.render( );
+	}
+
+	private static _on_edit_item_qty( this: ActionEditor, _event: any, target: HTMLInputElement )
+	{
+		const item_uuid = target.dataset.itemUuid || '';
+		const qty = Math.max( 1, parseInt( target.value ) || 1 );
+		this._sync_form_to_data( );
+		const item = this.action_data.items.find( ( i: any ) => i.uuid === item_uuid );
+		if ( item )
+		{
+			item.quantity = qty;
+		}
 	}
 
 	private static _on_create_effect( this: ActionEditor, event: any, _target: HTMLButtonElement ) 
@@ -237,3 +337,4 @@ export class ActionEditor extends ( HandlebarsApplicationMixin( ApplicationV2 ) 
 		this.close( );
 	}
 }
+

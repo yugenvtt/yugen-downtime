@@ -29,7 +29,7 @@
 					<span class="item-text">
 						<strong>{{this.actor_name}}</strong> invested in <strong>{{this.action_name}}</strong> ({{this.cost}} {{#if (eq this.cost 1)}}point{{else}}points{{/if}})
 						{{#if this.roll_check}}
-						- Rolled <strong>{{this.roll_total}}</strong> {{#if this.dc}}vs DC {{this.dc}}{{/if}} ({{#if this.roll_success}}<span class="success-text">Success</span>{{else}}<span class="failure-text">Failure</span>{{/if}})
+						- Rolled <strong>{{this.roll_total}}</strong> for {{this.roll_check_label}} {{#if this.dc}}vs DC {{this.dc}}{{/if}} ({{#if this.roll_success}}<span class="success-text">Success</span>{{else}}<span class="failure-text">Failure</span>{{/if}})
 						{{/if}}
 					</span>
 				</div>
